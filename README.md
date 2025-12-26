@@ -4,7 +4,7 @@
 
 **Project Magnum** is a modern, offline-first AI Roleplay Client designed for privacy and aesthetics. It runs locally on your machine using **Ollama**, ensuring your chats remain private, uncensored, and secure.
 
-![Screenshot](screenshot_placeholder.png) *(Add a real screenshot later)*
+
 
 ## 🚀 Features
 - **100% Local & Private:** Data is stored in SQLite/JSON on your device. Nothing leaves your network.
