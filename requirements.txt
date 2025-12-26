@@ -1,0 +1,4 @@
+ollama
+packaging
+PyQt6
+huggingface_hub

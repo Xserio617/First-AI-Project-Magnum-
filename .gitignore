@@ -1,0 +1,15 @@
+venv/
+__pycache__/
+*.py[cod]
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.gguf
+*.bin
+models/
+*.db
+*.sqlite3
+data/chat_history.db
+session.json
+data/user_persona.json
