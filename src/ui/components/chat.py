@@ -26,9 +26,8 @@ class ChatBubble(QFrame):
 
     """Modern mesaj balonu"""
 
-    
-
     rewind_requested = pyqtSignal(int)
+    generate_image_requested = pyqtSignal(str)
 
     
 
@@ -167,9 +166,34 @@ class ChatBubble(QFrame):
 
         self.msg_label.customContextMenuRequested.connect(self.show_context_menu)
 
-
-
         bubble_layout.addWidget(self.msg_label)
+
+        if not self.is_user:
+            self.btn_gen_img = QPushButton("🎨")
+            self.btn_gen_img.setToolTip("Görsel Oluştur")
+            self.btn_gen_img.setCursor(Qt.CursorShape.PointingHandCursor)
+            self.btn_gen_img.setFixedSize(28, 28)
+            self.btn_gen_img.setStyleSheet("""
+                QPushButton {
+                    background-color: transparent;
+                    color: #a1a1aa;
+                    border: none;
+                    border-radius: 14px;
+                    font-size: 14px;
+                }
+                QPushButton:hover {
+                    background-color: rgba(255, 255, 255, 0.1);
+                    color: white;
+                }
+            """)
+            self.btn_gen_img.clicked.connect(self.request_image_generation)
+            
+            btn_layout = QHBoxLayout()
+            btn_layout.addStretch()
+            btn_layout.addWidget(self.btn_gen_img)
+            btn_layout.setContentsMargins(0, 5, 0, 0)
+            
+            bubble_layout.addLayout(btn_layout)
 
         
 

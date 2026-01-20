@@ -1,0 +1,6579 @@
+# ==========================================
+# FILE: .gitignore
+# ==========================================
+venv/
+__pycache__/
+*.py[cod]
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.gguf
+*.bin
+models/
+*.db
+*.sqlite3
+data/chat_history.db
+session.json
+data/user_persona.json
+assets/generated_images/
+assets/avatars/
+
+
+# ==========================================
+# FILE: check_db.py
+# ==========================================
+import sqlite3
+import os
+from src.config import DB_FILE
+
+print(f"DB_FILE: {DB_FILE}")
+
+if os.path.exists(DB_FILE):
+    conn = sqlite3.connect(DB_FILE)
+    cursor = conn.cursor()
+    cursor.execute("SELECT count(*) FROM messages")
+    count = cursor.fetchone()[0]
+    print(f"Total messages: {count}")
+    
+    cursor.execute("SELECT character_name, count(*) FROM messages GROUP BY character_name")
+    rows = cursor.fetchall()
+    for row in rows:
+        print(f"Character: {row[0]}, Messages: {row[1]}")
+    
+    conn.close()
+else:
+    print("DB File does not exist.")
+
+
+# ==========================================
+# FILE: download_model.py
+# ==========================================
+from huggingface_hub import hf_hub_download
+
+import os
+
+
+
+print("--- DOWNLOADING MODEL: Magnum-v4-12b (Q6_K) ---")
+
+print("This process may take a while depending on your internet speed...")
+
+
+
+try:
+
+    hf_hub_download(
+
+        repo_id="mradermacher/Magnum-v4-12b-GGUF",
+
+        filename="magnum-v4-12b.Q6_K.gguf", 
+
+        local_dir=".",
+
+        local_dir_use_symlinks=False
+
+    )
+
+    print("--- DOWNLOAD COMPLETE ---")
+
+except Exception as e:
+
+    print(f"ERROR: {e}")
+
+    print("Trying alternative model: Q8_0 (Highest Quality)")
+
+    try:
+
+        hf_hub_download(
+
+            repo_id="mradermacher/Magnum-v4-12b-GGUF",
+
+            filename="magnum-v4-12b.Q8_0.gguf",
+
+            local_dir=".",
+
+            local_dir_use_symlinks=False
+
+        )
+
+        print("--- DOWNLOAD COMPLETE (Q8_0) ---")
+
+    except Exception as e2:
+
+        print(f"SECOND ERROR: {e2}")
+
+
+
+# ==========================================
+# FILE: LICENSE
+# ==========================================
+                                 Apache License
+                           Version 2.0, January 2004
+                        http://www.apache.org/licenses/
+
+   TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION
+
+   1. Definitions.
+
+      "License" shall mean the terms and conditions for use, reproduction,
+      and distribution as defined by Sections 1 through 9 of this document.
+
+      "Licensor" shall mean the copyright owner or entity authorized by
+      the copyright owner that is granting the License.
+
+      "Legal Entity" shall mean the union of the acting entity and all
+      other entities that control, are controlled by, or are under common
+      control with that entity. For the purposes of this definition,
+      "control" means (i) the power, direct or indirect, to cause the
+      direction or management of such entity, whether by contract or
+      otherwise, or (ii) ownership of fifty percent (50%) or more of the
+      outstanding shares, or (iii) beneficial ownership of such entity.
+
+      "You" (or "Your") shall mean an individual or Legal Entity
+      exercising permissions granted by this License.
+
+      "Source" form shall mean the preferred form for making modifications,
+      including but not limited to software source code, documentation
+      source, and configuration files.
+
+      "Object" form shall mean any form resulting from mechanical
+      transformation or translation of a Source form, including but
+      not limited to compiled object code, generated documentation,
+      and conversions to other media types.
+
+      "Work" shall mean the work of authorship, whether in Source or
+      Object form, made available under the License, as indicated by a
+      copyright notice that is included in or attached to the work
+      (an example is provided in the Appendix below).
+
+      "Derivative Works" shall mean any work, whether in Source or Object
+      form, that is based on (or derived from) the Work and for which the
+      editorial revisions, annotations, elaborations, or other modifications
+      represent, as a whole, an original work of authorship. For the purposes
+      of this License, Derivative Works shall not include works that remain
+      separable from, or merely link (or bind by name) to the interfaces of,
+      the Work and Derivative Works thereof.
+
+      "Contribution" shall mean any work of authorship, including
+      the original version of the Work and any modifications or additions
+      to that Work or Derivative Works thereof, that is intentionally
+      submitted to Licensor for inclusion in the Work by the copyright owner
+      or by an individual or Legal Entity authorized to submit on behalf of
+      the copyright owner. For the purposes of this definition, "submitted"
+      means any form of electronic, verbal, or written communication sent
+      to the Licensor or its representatives, including but not limited to
+      communication on electronic mailing lists, source code control systems,
+      and issue tracking systems that are managed by, or on behalf of, the
+      Licensor for the purpose of discussing and improving the Work, but
+      excluding communication that is conspicuously marked or otherwise
+      designated in writing by the copyright owner as "Not a Contribution."
+
+      "Contributor" shall mean Licensor and any individual or Legal Entity
+      on behalf of whom a Contribution has been received by Licensor and
+      subsequently incorporated within the Work.
+
+   2. Grant of Copyright License. Subject to the terms and conditions of
+      this License, each Contributor hereby grants to You a perpetual,
+      worldwide, non-exclusive, no-charge, royalty-free, irrevocable
+      copyright license to reproduce, prepare Derivative Works of,
+      publicly display, publicly perform, sublicense, and distribute the
+      Work and such Derivative Works in Source or Object form.
+
+   3. Grant of Patent License. Subject to the terms and conditions of
+      this License, each Contributor hereby grants to You a perpetual,
+      worldwide, non-exclusive, no-charge, royalty-free, irrevocable
+      (except as stated in this section) patent license to make, have made,
+      use, offer to sell, sell, import, and otherwise transfer the Work,
+      where such license applies only to those patent claims licensable
+      by such Contributor that are necessarily infringed by their
+      Contribution(s) alone or by combination of their Contribution(s)
+      with the Work to which such Contribution(s) was submitted. If You
+      institute patent litigation against any entity (including a
+      cross-claim or counterclaim in a lawsuit) alleging that the Work
+      or a Contribution incorporated within the Work constitutes direct
+      or contributory patent infringement, then any patent licenses
+      granted to You under this License for that Work shall terminate
+      as of the date such litigation is filed.
+
+   4. Redistribution. You may reproduce and distribute copies of the
+      Work or Derivative Works thereof in any medium, with or without
+      modifications, and in Source or Object form, provided that You
+      meet the following conditions:
+
+      (a) You must give any other recipients of the Work or
+          Derivative Works a copy of this License; and
+
+      (b) You must cause any modified files to carry prominent notices
+          stating that You changed the files; and
+
+      (c) You must retain, in the Source form of any Derivative Works
+          that You distribute, all copyright, patent, trademark, and
+          attribution notices from the Source form of the Work,
+          excluding those notices that do not pertain to any part of
+          the Derivative Works; and
+
+      (d) If the Work includes a "NOTICE" text file as part of its
+          distribution, then any Derivative Works that You distribute must
+          include a readable copy of the attribution notices contained
+          within such NOTICE file, excluding those notices that do not
+          pertain to any part of the Derivative Works, in at least one
+          of the following places: within a NOTICE text file distributed
+          as part of the Derivative Works; within the Source form or
+          documentation, if provided along with the Derivative Works; or,
+          within a display generated by the Derivative Works, if and
+          wherever such third-party notices normally appear. The contents
+          of the NOTICE file are for informational purposes only and
+          do not modify the License. You may add Your own attribution
+          notices within Derivative Works that You distribute, alongside
+          or as an addendum to the NOTICE text from the Work, provided
+          that such additional attribution notices cannot be construed
+          as modifying the License.
+
+      You may add Your own copyright statement to Your modifications and
+      may provide additional or different license terms and conditions
+      for use, reproduction, or distribution of Your modifications, or
+      for any such Derivative Works as a whole, provided Your use,
+      reproduction, and distribution of the Work otherwise complies with
+      the conditions stated in this License.
+
+   5. Submission of Contributions. Unless You explicitly state otherwise,
+      any Contribution intentionally submitted for inclusion in the Work
+      by You to the Licensor shall be under the terms and conditions of
+      this License, without any additional terms or conditions.
+      Notwithstanding the above, nothing herein shall supersede or modify
+      the terms of any separate license agreement you may have executed
+      with Licensor regarding such Contributions.
+
+   6. Trademarks. This License does not grant permission to use the trade
+      names, trademarks, service marks, or product names of the Licensor,
+      except as required for reasonable and customary use in describing the
+      origin of the Work and reproducing the content of the NOTICE file.
+
+   7. Disclaimer of Warranty. Unless required by applicable law or
+      agreed to in writing, Licensor provides the Work (and each
+      Contributor provides its Contributions) on an "AS IS" BASIS,
+      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+      implied, including, without limitation, any warranties or conditions
+      of TITLE, NON-INFRINGEMENT, MERCHANTABILITY, or FITNESS FOR A
+      PARTICULAR PURPOSE. You are solely responsible for determining the
+      appropriateness of using or redistributing the Work and assume any
+      risks associated with Your exercise of permissions under this License.
+
+   8. Limitation of Liability. In no event and under no legal theory,
+      whether in tort (including negligence), contract, or otherwise,
+      unless required by applicable law (such as deliberate and grossly
+      negligent acts) or agreed to in writing, shall any Contributor be
+      liable to You for damages, including any direct, indirect, special,
+      incidental, or consequential damages of any character arising as a
+      result of this License or out of the use or inability to use the
+      Work (including but not limited to damages for loss of goodwill,
+      work stoppage, computer failure or malfunction, or any and all
+      other commercial damages or losses), even if such Contributor
+      has been advised of the possibility of such damages.
+
+   9. Accepting Warranty or Additional Liability. While redistributing
+      the Work or Derivative Works thereof, You may choose to offer,
+      and charge a fee for, acceptance of support, warranty, indemnity,
+      or other liability obligations and/or rights consistent with this
+      License. However, in accepting such obligations, You may act only
+      on Your own behalf and on Your sole responsibility, not on behalf
+      of any other Contributor, and only if You agree to indemnify,
+      defend, and hold each Contributor harmless for any liability
+      incurred by, or claims asserted against, such Contributor by reason
+      of your accepting any such warranty or additional liability.
+
+   END OF TERMS AND CONDITIONS
+
+   APPENDIX: How to apply the Apache License to your work.
+
+      To apply the Apache License to your work, attach the following
+      boilerplate notice, with the fields enclosed by brackets "[]"
+      replaced with your own identifying information. (Don't include
+      the brackets!)  The text should be enclosed in the appropriate
+      comment syntax for the file format. We also recommend that a
+      file or class name and description of purpose be included on the
+      same "printed page" as the copyright notice for easier
+      identification within third-party archives.
+
+   Copyright 2025 Xserio617
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+
+
+# ==========================================
+# FILE: main.py
+# ==========================================
+import sys
+from PyQt6.QtWidgets import QApplication
+from src.ui.auth_window import AuthWindow
+from src.ui.main_window import MainApp
+from src.auth_manager import AuthManager
+
+
+main_window_instance = None
+login_window_instance = None
+
+def start_app():
+    global main_window_instance, login_window_instance
+    
+    app = QApplication(sys.argv)
+
+    def show_login():
+        """Function to open login screen"""
+        global login_window_instance
+        login_window_instance = AuthWindow()
+        login_window_instance.login_successful.connect(on_login_success)
+        login_window_instance.show()
+
+    def on_logout():
+        """Function to run on logout"""
+        global main_window_instance
+        print("Logged out. Returning to login screen...")
+
+        show_login()
+
+    def on_login_success(user_data):
+        """Function to run on login success"""
+        global main_window_instance, login_window_instance
+        
+        print(f"Login successful: {user_data['username']}")
+        
+    
+        if login_window_instance:
+            login_window_instance.close()
+
+
+        main_window_instance = MainApp(
+            user_id=user_data['id'], 
+            username=user_data['username'] 
+        )
+        
+
+        main_window_instance.logout_requested.connect(on_logout) 
+        main_window_instance.show()
+
+    saved_user_id = AuthManager.get_remembered_user()
+    
+    if saved_user_id:
+        print(f"Welcome! ID: {saved_user_id}")
+        main_window_instance = MainApp(user_id=saved_user_id, username="Registered Member") 
+        main_window_instance.logout_requested.connect(on_logout)
+        main_window_instance.show()
+    else:
+        show_login()
+
+    sys.exit(app.exec())
+
+if __name__ == "__main__":
+    start_app()
+
+# ==========================================
+# FILE: Modelfile
+# ==========================================
+FROM ./magnum-v4-12b.Q8_0(2).gguf
+
+# Magnum v4 / ChatML Template
+TEMPLATE """{{ if .System }}<|im_start|>system
+{{ .System }}<|im_end|>
+{{ end }}{{ range .Messages }}{{ if eq .Role "user" }}<|im_start|>user
+{{ .Content }}<|im_end|>
+{{ else if eq .Role "assistant" }}<|im_start|>assistant
+{{ .Content }}<|im_end|>
+{{ end }}{{ end }}<|im_start|>assistant
+"""
+
+# Stop sequences
+PARAMETER stop "<|im_start|>"
+PARAMETER stop "<|im_end|>"
+
+# Magnum için optimize edilmiş parametreler
+PARAMETER temperature 0.8
+PARAMETER top_k 40
+PARAMETER top_p 0.9
+PARAMETER min_p 0.05
+PARAMETER repeat_penalty 1.1
+
+# ==========================================
+# FILE: README.md
+# ==========================================
+# Project Magnum (Alpha)
+
+![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg) ![Python](https://img.shields.io/badge/Python-3.10%2B-yellow)
+
+**Project Magnum** is a modern, offline-first AI Roleplay Client designed for privacy and aesthetics. It runs locally on your machine using **Ollama**, ensuring your chats remain private, uncensored, and secure.
+
+
+
+## 🚀 Features
+- **100% Local & Private:** Data is stored in SQLite/JSON on your device. Nothing leaves your network.
+- **Modern UI:** Built with **PyQt6**, featuring a clean dark mode inspired by Windows 11 / Glassmorphism.
+- **High-Fidelity Roleplay:** Optimized for **Magnum-12B (Q8)** to provide rich, literary-style responses.
+- **Character Cards:** Import/Create characters with avatars and custom personas.
+- **Flexible Backend:** Powered by Ollama (supports any imported GGUF model).
+
+## 🛠️ Installation
+
+### 1. Prerequisites
+- **Python 3.10+** installed.
+- **[Ollama](https://ollama.com)** installed and running.
+
+### 2. Setup the Project
+```bash
+# Clone the repository
+git clone [https://github.com/Xserio617/First-AI-Project-Magnum-.git](https://github.com/Xserio617/First-AI-Project-Magnum-.git)
+
+# Enter directory
+cd First-AI-Project-Magnum-
+
+# Install dependencies
+pip install -r requirements.txt
+
+# ==========================================
+# FILE: requirements.txt
+# ==========================================
+ollama
+packaging
+PyQt6
+huggingface_hub
+--index-url https://download.pytorch.org/whl/nightly/cu126
+torch
+diffusers
+transformers
+accelerate
+protobuf
+sentencepiece
+bcrypt
+
+
+# ==========================================
+# FILE: data/characters.json
+# ==========================================
+{
+    "Example Bot": {
+        "prompt": "You are a helpful assistant..",
+        "greeting": "Hello! How can I help you?"
+    },
+    "Benjamin": {
+        "prompt": "He is an Scumbag from a street. He had an vey bad mothf dor elself. He is 19 years old. he smoke a cigaratte pretty often.",
+        "greeting": "Hey you! What'a doing in my street boy?",
+        "avatar": "assets/avatars/Benjamin.png"
+    }
+}
+
+# ==========================================
+# FILE: data/user_persona.json
+# ==========================================
+{
+    "current_persona": "Default",
+    "personas": [
+        {
+            "name": "Default",
+            "gender": "Not Specified",
+            "description": "No specific information about the user."
+        }
+    ]
+}
+
+# ==========================================
+# FILE: src/ai_engine.py
+# ==========================================
+import ollama
+
+from src.config import MODEL_NAME
+
+
+
+class AIEngine:
+
+    def generate_response_stream(self, system_prompt, user_persona, chat_history, user_message, **kwargs):
+
+        """
+
+        Ollama'ya gönderilecek prompt'u hazırlar ve stream (akış) başlatır.
+
+        Saf İngilizce Modu: Modelin en yüksek performansını vermesi için.
+
+        """
+
+        
+
+        print(f"--- ACTIVE MODEL: {MODEL_NAME} (Native English Mode) ---")
+
+
+
+        formatting_rules = """
+
+FORMATTING RULES:
+
+- Use *single asterisks* for physical actions and expressions. (e.g., *smiles softly*)
+
+- Use **double asterisks** for internal thoughts that are NOT spoken aloud. (e.g., **I wonder if he knows the truth**)
+
+- Use ***triple asterisks*** for setting the scene or describing the environment. (e.g., ***The wind howls outside the castle walls***)
+
+"""
+
+        final_prompt = (
+
+            f"You are roleplaying as: {system_prompt}\n\n"
+
+            f"--- INSTRUCTIONS ---\n"
+
+            f"1. Stay in character at all times. Never break the fourth wall.\n"
+
+            f"2. Write primarily in English. Use descriptive, literary language.\n"
+
+            f"3. Only speak for your character. Do NOT describe the user's actions.\n"
+
+            f"{formatting_rules}\n"
+
+            f"--- USER INFO ---\n"
+
+            f"Information about the user you are talking to:\n{user_persona}\n"
+
+        )
+
+
+
+        messages_payload = [{'role': 'system', 'content': final_prompt}]
+
+        
+
+        for role, content in chat_history:
+
+            api_role = "assistant" if role == "assistant" else "user"
+
+            messages_payload.append({'role': api_role, 'content': content})
+
+        
+
+        messages_payload.append({'role': 'user', 'content': user_message})
+
+
+
+        try:
+
+            return ollama.chat(
+
+                model=MODEL_NAME, 
+
+                messages=messages_payload, 
+
+                stream=True, 
+
+                options=kwargs
+
+            )
+
+        except Exception as e:
+
+            if "10061" in str(e):
+
+                raise ConnectionError("Could not connect to Ollama. Make sure the app is running.") from e
+
+            raise e
+
+# ==========================================
+# FILE: src/auth_manager.py
+# ==========================================
+import json
+import os
+
+SESSION_FILE = "session.json"
+
+class AuthManager:
+    @staticmethod
+    def save_session(user_id, remember_me=False):
+        """Kullanıcı giriş yaptığında çağırılır."""
+        if remember_me:
+            data = {
+                "user_id": user_id,
+                "is_remembered": True
+            }
+            try:
+                with open(SESSION_FILE, "w", encoding="utf-8") as f:
+                    json.dump(data, f)
+            except Exception as e:
+                print(f"Session save error: {e}")
+        else:
+            AuthManager.clear_session()
+
+    @staticmethod
+    def get_remembered_user():
+        """Program açılırken kayıtlı kullanıcı var mı bakar."""
+        if not os.path.exists(SESSION_FILE):
+            return None
+            
+        try:
+            with open(SESSION_FILE, "r", encoding="utf-8") as f:
+                data = json.load(f)
+                if data.get("is_remembered"):
+                    return data.get("user_id")
+        except:
+            return None
+        return None
+
+    @staticmethod
+    def clear_session():
+        """Çıkış yapıldığında session dosyasını siler."""
+        if os.path.exists(SESSION_FILE):
+            try:
+                os.remove(SESSION_FILE)
+            except Exception as e:
+                print(f"Session delete error: {e}")
+
+# ==========================================
+# FILE: src/config.py
+# ==========================================
+import os
+
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+MODEL_NAME = "magnum-v4"
+
+IMG_MODEL_ID = "cagliostrolab/animagine-xl-3.1"
+IMG_OUTPUT_DIR = os.path.join(BASE_DIR, "assets", "generated_images")
+
+DEFAULT_NEGATIVE_PROMPT = (
+    "nsfw, lowres, (bad), text, error, fewer, extra, missing, worst quality, "
+    "jpeg artifacts, low quality, watermark, unfinished, displeasing, "
+    "chromatic aberration, signature, extra digits, artistic error, "
+    "username, scan, [abstract]"
+)
+
+DATA_DIR = os.path.join(BASE_DIR, "data")
+
+CHAR_FILE = os.path.join(DATA_DIR, "characters.json")
+USER_FILE = os.path.join(DATA_DIR, "user_persona.json")
+DB_FILE = os.path.join(DATA_DIR, "chat_history.db")
+SETTINGS_FILE = os.path.join(DATA_DIR, "settings.json")
+
+DEFAULT_CHAR = {
+    "Example Bot": {
+        "prompt": "You are a helpful assistant..", 
+        "greeting": "Hello! How can I help you?"
+    }
+}
+
+DEFAULT_USER = {
+  "current_persona": "Default",
+  "personas": [
+    {
+      "name": "Default",
+      "gender": "Not Specified",
+      "description": "No specific information about the user."
+    }
+  ]
+}
+
+DEFAULT_SETTINGS = {"temperature": 0.7}
+
+# ==========================================
+# FILE: src/database.py
+# ==========================================
+import json
+
+import os
+
+import sqlite3
+
+import bcrypt
+
+from src.config import DATA_DIR, DB_FILE
+
+
+
+class DatabaseManager:
+
+
+
+    def get_recent_chats(self, user_id):
+
+        """Kullanıcının mesajlaştığı karakterleri, son mesaj tarihine göre getirir."""
+
+        query = """
+
+            SELECT DISTINCT c.id, c.name, c.avatar_path, c.description, MAX(m.timestamp) as last_msg_time
+
+            FROM characters c
+
+            JOIN messages m ON c.id = m.character_id
+
+            WHERE m.user_id = ?
+
+            GROUP BY c.id
+
+            ORDER BY last_msg_time DESC
+
+        """
+
+        try:
+
+            cursor = self.conn.cursor()
+
+            cursor.execute(query, (user_id,))
+
+            columns = [col[0] for col in cursor.description]
+
+            results = []
+
+            for row in cursor.fetchall():
+
+                results.append(dict(zip(columns, row)))
+
+            return results
+
+        except Exception as e:
+
+            print(f"Chat history error: {e}")
+
+            return []
+
+        
+
+    def __init__(self):
+
+        self.ensure_setup()
+
+
+
+    def ensure_setup(self):
+
+        if not os.path.exists(DATA_DIR):
+
+            os.makedirs(DATA_DIR)
+
+        
+
+        conn = sqlite3.connect(DB_FILE)
+
+        cursor = conn.cursor()
+
+        
+
+
+
+        cursor.execute('''
+
+            CREATE TABLE IF NOT EXISTS messages (
+
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+                character_name TEXT,
+
+                role TEXT,
+
+                content TEXT,
+
+                timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+
+                user_id INTEGER
+
+            )
+
+        ''')
+
+        
+
+
+
+
+
+        cursor.execute('''
+
+            CREATE TABLE IF NOT EXISTS users (
+
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+                username TEXT UNIQUE NOT NULL,
+
+                password_hash BLOB NOT NULL,
+
+                personas TEXT, 
+
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+
+            )
+
+        ''')
+
+
+
+        try:
+
+            cursor.execute("ALTER TABLE users ADD COLUMN personas TEXT")
+
+        except sqlite3.OperationalError:
+
+            pass
+
+        
+
+        conn.commit()
+
+        conn.close()
+
+
+
+
+
+    def register_user(self, username, password):
+
+        """Yeni kullanıcı kaydeder"""
+
+        conn = sqlite3.connect(DB_FILE)
+
+        cursor = conn.cursor()
+
+        
+
+
+
+        password_bytes = password.encode('utf-8')
+
+        salt = bcrypt.gensalt()
+
+        hashed = bcrypt.hashpw(password_bytes, salt)
+
+
+
+        default_personas = [
+
+            {
+
+                "name": username, 
+
+                "gender": "", 
+
+                "description": "A new user.",
+
+                "avatar": None
+
+            }
+
+        ]
+
+        personas_json = json.dumps(default_personas, ensure_ascii=False)
+
+        
+
+        try:
+
+            cursor.execute("INSERT INTO users (username, password_hash, personas) VALUES (?, ?, ?)", 
+
+                         (username, hashed, personas_json))
+
+            conn.commit()
+
+            conn.close()
+
+            return True, "Registration successful! You can login."
+
+        except sqlite3.IntegrityError:
+
+            conn.close()
+
+            return False, "This username is already taken."
+
+        except Exception as e:
+
+            conn.close()
+
+            return False, f"Error: {str(e)}"
+
+
+
+    def login_user(self, username, password):
+
+        """Kullanıcı girişi yapar"""
+
+        conn = sqlite3.connect(DB_FILE)
+
+        cursor = conn.cursor()
+
+        
+
+        cursor.execute("SELECT id, password_hash FROM users WHERE username = ?", (username,))
+
+        user = cursor.fetchone()
+
+        conn.close()
+
+        
+
+        if user:
+
+            user_id, stored_hash = user
+
+            password_bytes = password.encode('utf-8')
+
+            
+
+            if bcrypt.checkpw(password_bytes, stored_hash):
+
+                return True, user_id
+
+            else:
+
+                return False, "Incorrect Password."
+
+        else:
+
+            return False, "User not found."
+
+        
+
+    def get_user_personas(self, user_id):
+
+        """Kullanıcının profillerini çeker"""
+
+        conn = sqlite3.connect(DB_FILE)
+
+        cursor = conn.cursor()
+
+        cursor.execute("SELECT personas FROM users WHERE id = ?", (user_id,))
+
+        row = cursor.fetchone()
+
+        conn.close()
+
+        
+
+        if row and row[0]:
+
+            return json.loads(row[0])
+
+        return []
+
+
+
+    def update_user_personas(self, user_id, personas_list):
+
+        """Kullanıcının profillerini günceller"""
+
+        conn = sqlite3.connect(DB_FILE)
+
+        cursor = conn.cursor()
+
+        personas_json = json.dumps(personas_list, ensure_ascii=False)
+
+        cursor.execute("UPDATE users SET personas = ? WHERE id = ?", (personas_json, user_id))
+
+        conn.commit()
+
+        conn.close()
+
+
+
+    def get_recent_chats(self, user_id):
+
+        return []
+
+        
+
+    def save_message(self, char_name, role, content):
+
+        conn = sqlite3.connect(DB_FILE)
+
+        cursor = conn.cursor()
+
+        cursor.execute("INSERT INTO messages (character_name, role, content) VALUES (?, ?, ?)", (char_name, role, content))
+
+        new_id = cursor.lastrowid
+
+        conn.commit()
+
+        conn.close()
+
+        return new_id
+
+
+
+    def get_history(self, char_name, limit=None):
+
+        conn = sqlite3.connect(DB_FILE)
+
+        cursor = conn.cursor()
+
+        cursor.execute("SELECT id, role, content FROM messages WHERE character_name = ? ORDER BY id ASC", (char_name,))
+
+        rows = cursor.fetchall()
+
+        conn.close()
+
+        if limit and len(rows) > limit: return rows[-limit:]
+
+        return rows
+
+
+
+    def rewind_history(self, char_name, last_msg_id):
+
+        """
+
+        Belirtilen mesajdan SONRAKİ tüm mesajları siler.
+
+        """
+
+        conn = sqlite3.connect(DB_FILE)
+
+        cursor = conn.cursor()
+
+        cursor.execute("DELETE FROM messages WHERE character_name = ? AND id > ?", (char_name, last_msg_id))
+
+        conn.commit()
+
+        conn.close()
+
+
+
+    def delete_character_history(self, char_name):
+
+        conn = sqlite3.connect(DB_FILE)
+
+        cursor = conn.cursor()
+
+        cursor.execute("DELETE FROM messages WHERE character_name = ?", (char_name,))
+
+        conn.commit(); conn.close()
+
+
+
+def load_json(filepath, default_content):
+
+    if not os.path.exists(filepath):
+
+        save_json(filepath, default_content)
+
+        return default_content
+
+    try:
+
+        with open(filepath, "r", encoding="utf-8") as f:
+
+            return json.load(f)
+
+    except Exception as e:
+
+        print(f"JSON Yükleme Hatası ({filepath}): {e}")
+
+        return default_content
+
+
+
+def save_json(filepath, data):
+
+    with open(filepath, "w", encoding="utf-8") as f:
+
+        json.dump(data, f, ensure_ascii=False, indent=4)
+
+# ==========================================
+# FILE: src/image_gen.py
+# ==========================================
+import os
+import torch
+from diffusers import StableDiffusionXLPipeline
+from src.config import IMG_MODEL_ID, IMG_OUTPUT_DIR, DEFAULT_NEGATIVE_PROMPT
+
+class ImageGenerator:
+    def __init__(self):
+        self.pipe = None
+        self.device = "cpu"
+        if torch.cuda.is_available():
+            try:
+                cap = torch.cuda.get_device_capability()
+                if cap[0] >= 10: 
+                    print(f"UYARI: GPU Mimarisi çok yeni ({cap}). PyTorch desteği bekleniyor. CPU kullanılacak.")
+                    self.device = "cpu"
+                else:
+                    self.device = "cuda"
+            except:
+                self.device = "cuda"
+        else:
+            self.device = "cpu"
+            
+        self._ensure_output_dir()
+
+    def _ensure_output_dir(self):
+        """Çıktı klasörünü oluşturur"""
+        if not os.path.exists(IMG_OUTPUT_DIR):
+            os.makedirs(IMG_OUTPUT_DIR)
+
+    def load_model(self):
+        """Modeli hafızaya yükler"""
+        if self.pipe is not None:
+            return
+
+        print(f"--- LOADING IMAGE MODEL: {IMG_MODEL_ID} ---")
+        try:
+            dtype = torch.float16 if self.device == "cuda" else torch.float32
+            self.pipe = StableDiffusionXLPipeline.from_pretrained(
+                IMG_MODEL_ID,
+                torch_dtype=dtype,
+                use_safetensors=True,
+            )
+            
+            self.pipe.to(self.device)
+            print(f"--- IMAGE MODEL LOADED SUCCESSFULLY ({self.device.upper()} MODE) ---")
+        except Exception as e:
+            print(f"FATAL ERROR loading image model: {e}")
+            self.pipe = None
+            raise e
+
+    def generate(self, prompt, negative_prompt=None, steps=28):
+        """Görsel oluşturur ve dosya yolunu döner"""
+        if not self.pipe:
+            self.load_model()
+
+        enhanced_prompt = f"masterpiece, best quality, {prompt}"
+        
+        final_neg = negative_prompt if negative_prompt else DEFAULT_NEGATIVE_PROMPT
+
+        print(f"Generating Image: {enhanced_prompt}...")
+        
+        try:
+            image = self.pipe(
+                prompt=enhanced_prompt,
+                negative_prompt=final_neg,
+                num_inference_steps=steps,
+                guidance_scale=7.0,
+                width=1024, # SDXL standart çözünürlük
+                height=1024
+            ).images[0]
+
+            from datetime import datetime
+            filename = f"img_{datetime.now().strftime('%Y%m%d_%H%M%S')}.png"
+            save_path = os.path.join(IMG_OUTPUT_DIR, filename)
+            
+            image.save(save_path)
+            print(f"Image saved to: {save_path}")
+            return save_path
+            
+        except Exception as e:
+            print(f"Generation Error: {e}")
+            return None
+
+# ==========================================
+# FILE: src/utils.py
+# ==========================================
+import base64
+
+import os
+
+
+
+def image_to_base64(image_path):
+
+    """Resim dosyasını Base64 string'e çevirir (Export için)"""
+
+    if not os.path.exists(image_path):
+
+        return None
+
+    try:
+
+        with open(image_path, "rb") as img_file:
+
+            return base64.b64encode(img_file.read()).decode('utf-8')
+
+    except Exception as e:
+
+        print(f"Image conversion error: {e}")
+
+        return None
+
+
+
+def base64_to_image(base64_string, save_path):
+
+    """Base64 string'i resim dosyasına çevirir (Import için)"""
+
+    try:
+
+        os.makedirs(os.path.dirname(save_path), exist_ok=True)
+
+        
+
+        with open(save_path, "wb") as img_file:
+
+            img_file.write(base64.b64decode(base64_string))
+
+        return True
+
+    except Exception as e:
+
+        print(f"Image save error: {e}")
+
+        return False
+
+# ==========================================
+# FILE: src/__init__.py
+# ==========================================
+
+
+# ==========================================
+# FILE: src/core/character_manager.py
+# ==========================================
+import json
+
+import os
+
+from src.config import CHAR_FILE, DEFAULT_CHAR
+
+
+
+class CharacterManager:
+
+    def __init__(self):
+
+        self.characters = []
+
+        self.load_characters()
+
+
+
+    def load_characters(self):
+
+        """Karakterleri JSON dosyasından yükler"""
+
+        if not os.path.exists(CHAR_FILE):
+
+            self.save_characters(DEFAULT_CHAR)
+
+            data = DEFAULT_CHAR
+
+        else:
+
+            try:
+
+                with open(CHAR_FILE, "r", encoding="utf-8") as f:
+
+                    data = json.load(f)
+
+            except (json.JSONDecodeError, FileNotFoundError):
+
+                data = DEFAULT_CHAR
+
+                self.save_characters(data)
+
+
+
+        self.characters = []
+
+        for name, details in data.items():
+
+            char_info = {"name": name}
+
+            char_info.update(details)
+
+            self.characters.append(char_info)
+
+
+
+    def save_characters(self, data):
+
+        """Karakterleri dosyaya kaydeder"""
+
+        os.makedirs(os.path.dirname(CHAR_FILE), exist_ok=True)
+
+        
+
+        with open(CHAR_FILE, "w", encoding="utf-8") as f:
+
+            json.dump(data, f, ensure_ascii=False, indent=4)
+
+
+
+    def get_all_characters(self):
+
+        """Tüm karakter listesini döndürür"""
+
+        return self.characters
+
+
+
+    def get_character(self, name):
+
+        """İsme göre tek bir karakter verisi döndürür"""
+
+        for char in self.characters:
+
+            if char['name'] == name:
+
+                return char
+
+        return None
+
+# ==========================================
+# FILE: src/core/__init__.py
+# ==========================================
+
+
+# ==========================================
+# FILE: src/ui/auth_window.py
+# ==========================================
+from PyQt6.QtWidgets import (
+
+    QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, 
+
+    QLineEdit, QPushButton, QLabel, QFrame, QMessageBox, QCheckBox
+
+)
+
+from PyQt6.QtCore import Qt, pyqtSignal
+
+from src.database import DatabaseManager
+
+from src.ui.components import CustomTitleBar, LogoWidget
+
+from src.auth_manager import AuthManager
+
+
+
+class AuthWindow(QMainWindow):
+
+    character_saved = pyqtSignal(dict)
+
+    login_successful = pyqtSignal(dict)
+
+
+
+    def __init__(self, parent=None):
+
+        super().__init__(parent)
+
+        self.setWindowTitle("Login")
+
+        self.setFixedSize(400, 600)
+
+        self.is_login_mode = True 
+
+        self.db = DatabaseManager()
+
+        self.setup_ui()
+
+        self.avatar_path = None
+
+
+
+    def setup_ui(self):
+
+        self.setWindowFlags(Qt.WindowType.FramelessWindowHint)
+
+        self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
+
+        
+
+        main_container = QWidget()
+
+        main_container.setObjectName("MainContainer")
+
+        main_container.setStyleSheet("""
+
+            QWidget#MainContainer {
+
+                background-color: #09090b; 
+
+                border: 1px solid #27272a;
+
+                border-radius: 12px;
+
+            }
+
+        """)
+
+        self.setCentralWidget(main_container)
+
+        
+
+        main_layout = QVBoxLayout(main_container)
+
+        main_layout.setContentsMargins(0, 0, 0, 0)
+
+        main_layout.setSpacing(0)
+
+        
+
+        self.title_bar = CustomTitleBar(self)
+
+        btn_max = self.title_bar.findChild(QPushButton, "btn_max")
+
+        if btn_max: btn_max.hide()
+
+        
+
+        self.title_bar.findChild(QLabel).setText("Magnum AI - Login")
+
+        self.title_bar.setStyleSheet("""
+
+            QFrame {
+
+                background-color: transparent; 
+
+                border-bottom: 1px solid #27272a;
+
+                border-top-left-radius: 12px;
+
+                border-top-right-radius: 12px;
+
+            }
+
+        """)
+
+        main_layout.addWidget(self.title_bar)
+
+        
+
+        content_widget = QWidget()
+
+        content_layout = QVBoxLayout(content_widget)
+
+        content_layout.setContentsMargins(40, 20, 40, 40)
+
+        content_layout.setSpacing(20)
+
+        
+
+        logo_container = QHBoxLayout()
+
+        logo_container.addStretch()
+
+        logo = LogoWidget()
+
+        logo_container.addWidget(logo)
+
+        logo_container.addStretch()
+
+        content_layout.addLayout(logo_container)
+
+        
+
+        self.title_label = QLabel("Welcome Back")
+
+        self.title_label.setStyleSheet("color: white; font-size: 24px; font-weight: bold; font-family: 'Segoe UI';")
+
+        self.title_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+        content_layout.addWidget(self.title_label)
+
+        
+
+        self.subtitle_label = QLabel("Enter the AI world")
+
+        self.subtitle_label.setStyleSheet("color: #a1a1aa; font-size: 14px; font-family: 'Segoe UI';")
+
+        self.subtitle_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+        content_layout.addWidget(self.subtitle_label)
+
+        
+
+        self.input_username = QLineEdit()
+
+        self.input_username.setPlaceholderText("Username")
+
+        self.input_username.setFixedHeight(45)
+
+        self.input_username.setStyleSheet(self._get_input_style())
+
+        content_layout.addWidget(self.input_username)
+
+        
+
+        self.input_password = QLineEdit()
+
+        self.input_password.setPlaceholderText("Password")
+
+        self.input_password.setEchoMode(QLineEdit.EchoMode.Password)
+
+        self.input_password.setFixedHeight(45)
+
+        self.input_password.setStyleSheet(self._get_input_style())
+
+        content_layout.addWidget(self.input_password)
+
+
+
+        self.chk_remember = QCheckBox("Remember Me")
+
+        self.chk_remember.setCursor(Qt.CursorShape.PointingHandCursor)
+
+        self.chk_remember.setStyleSheet("""
+
+            QCheckBox { color: #a1a1aa; font-size: 13px; }
+
+            QCheckBox::indicator { width: 18px; height: 18px; border: 1px solid #3f3f46; border-radius: 4px; background: #27272a; }
+
+            QCheckBox::indicator:checked { background-color: #6366f1; border-color: #6366f1; }
+
+        """)
+
+        content_layout.addWidget(self.chk_remember)
+
+        
+
+        self.btn_action = QPushButton("Login")
+
+        self.btn_action.setFixedHeight(45)
+
+        self.btn_action.setCursor(Qt.CursorShape.PointingHandCursor)
+
+        self.btn_action.setStyleSheet("""
+
+            QPushButton {
+
+                background-color: #6366f1;
+
+                color: white;
+
+                border: none;
+
+                border-radius: 8px;
+
+                font-weight: bold;
+
+                font-size: 14px;
+
+            }
+
+            QPushButton:hover { background-color: #4f46e5; }
+
+        """)
+
+        self.btn_action.clicked.connect(self.handle_auth)
+
+        content_layout.addWidget(self.btn_action)
+
+        
+
+        self.btn_toggle = QPushButton("Don't have an account? Register")
+
+        self.btn_toggle.setCursor(Qt.CursorShape.PointingHandCursor)
+
+        self.btn_toggle.setStyleSheet("color: #a1a1aa; background: transparent; border: none;")
+
+        self.btn_toggle.clicked.connect(self.toggle_mode)
+
+        content_layout.addWidget(self.btn_toggle)
+
+        
+
+        content_layout.addStretch()
+
+        main_layout.addWidget(content_widget)
+
+
+
+    def _get_input_style(self):
+
+        return """
+
+            QLineEdit, QTextEdit {
+
+                background-color: #27272a; color: white;
+
+                border: 1px solid #3f3f46; border-radius: 8px; padding: 8px;
+
+                selection-background-color: #6366f1;
+
+            }
+
+            QLineEdit:focus, QTextEdit:focus { border: 1px solid #6366f1; }
+
+        """
+
+
+
+    def toggle_mode(self):
+
+        self.is_login_mode = not self.is_login_mode
+
+        
+
+        if self.is_login_mode:
+
+            self.title_label.setText("Welcome")
+
+            self.subtitle_label.setText("Login to continue")
+
+            self.btn_action.setText("Login")
+
+            self.btn_toggle.setText("Don't have an account? Register")
+
+            self.chk_remember.show()
+
+        else:
+
+            self.title_label.setText("Create Account")
+
+            self.subtitle_label.setText("Register to start your journey")
+
+            self.btn_action.setText("Register")
+
+            self.btn_toggle.setText("Already have an account? Login")
+
+            self.chk_remember.hide()
+
+            
+
+    def handle_auth(self):
+
+        username = self.input_username.text().strip()
+
+        password = self.input_password.text().strip()
+
+        
+
+        if not username or not password:
+
+            QMessageBox.warning(self, "Error", "Please fill in all fields.")
+
+            return
+
+            
+
+        if self.is_login_mode:
+
+            success, result = self.db.login_user(username, password)
+
+            if success:
+
+                user_data = {"id": result, "username": username}
+
+                
+
+                is_remember = self.chk_remember.isChecked()
+
+                AuthManager.save_session(result, is_remember)
+
+
+
+                self.login_successful.emit(user_data)
+
+                self.close()
+
+            else:
+
+                QMessageBox.warning(self, "Error", result)
+
+        else:
+
+            success, msg = self.db.register_user(username, password)
+
+            if success:
+
+                QMessageBox.information(self, "Success", msg)
+
+                self.toggle_mode()
+
+            else:
+
+                QMessageBox.warning(self, "Error", msg)
+
+# ==========================================
+# FILE: src/ui/main_window.py
+# ==========================================
+"""
+Modern PyQt6 Main Window - Character.ai Style
+Updated: Pony Diffusion V6 Integration
+"""
+
+import sys
+import json
+import os
+import shutil
+from PyQt6.QtWidgets import (
+    QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, 
+    QTextEdit, QPushButton, QLabel, QFrame, 
+    QMessageBox, QSizePolicy, QApplication, QStackedWidget,
+    QScrollArea, QListWidget, QListWidgetItem, QFileDialog
+)
+from PyQt6.QtCore import Qt, pyqtSignal, QThread, QTimer, QSize
+from PyQt6.QtGui import QIcon, QColor
+
+from src.utils import image_to_base64
+from src.config import CHAR_FILE, USER_FILE, DEFAULT_CHAR, DEFAULT_USER
+from src.database import DatabaseManager, load_json, save_json
+from src.ai_engine import AIEngine
+from src.image_gen import ImageGenerator
+from src.ui.popups import CharacterPopup, PersonaPopup
+
+from src.ui.components import (
+    ChatBubble, SidebarIconButton, LogoWidget, CustomTitleBar, SendButton, SmoothScrollArea
+)
+from src.ui.pages.home_page import HomePage
+from src.ui.pages.settings_page import SettingsPage
+from src.ui.pages.profile_page import ProfilePage 
+
+class ChatRowWidget(QWidget):
+    def __init__(self, name, last_message, avatar_char, on_pin_click, on_delete_click):
+        super().__init__()
+        self.layout = QHBoxLayout(self)
+        self.layout.setContentsMargins(15, 12, 15, 12) 
+        self.layout.setSpacing(15)
+
+        self.avatar = QLabel(avatar_char)
+        self.avatar.setFixedSize(50, 50)
+        self.avatar.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.avatar.setStyleSheet("""
+            QLabel {
+                background: qlineargradient(x1:0, y1:0, x2:1, y2:1, stop:0 #1e1e2e, stop:1 #6366f1);
+                color: white; border-radius: 25px; font-size: 20px; font-weight: bold; border: 1px solid #3f3f46; padding: 0px;
+            }
+        """)
+        self.layout.addWidget(self.avatar)
+
+        self.text_layout = QVBoxLayout()
+        self.text_layout.setSpacing(4)
+        self.name_label = QLabel(name)
+        self.name_label.setStyleSheet("color: white; font-size: 16px; font-weight: 700; background: transparent;")
+        self.msg_label = QLabel(last_message)
+        self.msg_label.setStyleSheet("color: #94a3b8; font-size: 13px; background: transparent;")
+        self.msg_label.setWordWrap(False)
+        self.text_layout.addWidget(self.name_label)
+        self.text_layout.addWidget(self.msg_label)
+        self.layout.addLayout(self.text_layout)
+        self.layout.addStretch()
+
+        self.btn_pin = QPushButton("⋮") 
+        self.btn_pin.setFixedSize(32, 32)
+        self.btn_pin.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.btn_pin.setStyleSheet("QPushButton { background-color: transparent; color: #71717a; border: none; font-size: 22px; border-radius: 16px; } QPushButton:hover { background-color: #27272a; color: white; }")
+        self.btn_pin.clicked.connect(on_pin_click)
+        self.layout.addWidget(self.btn_pin)
+
+        self.btn_delete = SidebarIconButton("trash", tooltip="Delete Chat")
+        self.btn_delete.setFixedSize(32, 32) 
+        self.btn_delete.clicked.connect(on_delete_click)
+        self.layout.addWidget(self.btn_delete)
+
+class ImageGenWorker(QThread):
+    finished = pyqtSignal(str) # Dosya yolunu döner
+    error = pyqtSignal(str)
+
+    def __init__(self, generator, prompt):
+        super().__init__()
+        self.generator = generator
+        self.prompt = prompt
+
+    def run(self):
+        try:
+            path = self.generator.generate(self.prompt)
+            if path:
+                self.finished.emit(path)
+            else:
+                self.error.emit("Görsel oluşturulamadı (Bilinmeyen hata).")
+        except Exception as e:
+            self.error.emit(str(e))
+class AIWorker(QThread):
+    token_received = pyqtSignal(str)
+    finished = pyqtSignal()
+    error = pyqtSignal(str)
+
+    def __init__(self, engine, system_prompt, user_persona, history, message):
+        super().__init__()
+        self.engine, self.system_prompt, self.user_persona, self.history, self.message = engine, system_prompt, user_persona, history, message
+        self.stop_flag = False
+
+    def run(self):
+        try:
+            stream = self.engine.generate_response_stream(
+                self.system_prompt, self.user_persona, self.history, self.message
+            )
+            for chunk in stream:
+                if self.stop_flag: break
+                if 'message' in chunk and 'content' in chunk['message']:
+                    self.token_received.emit(chunk['message']['content'])
+            self.finished.emit()
+        except Exception as e:
+            self.error.emit(str(e))
+
+class MainApp(QMainWindow):
+    logout_requested = pyqtSignal()
+    def __init__(self, user_id=None, username="Guest"):
+        super().__init__()
+        self.setWindowTitle("AI Chat")
+        self.resize(1400, 900)
+        self.setMinimumSize(1100, 700)
+        
+        self.current_user_id = user_id 
+        self.current_username = username
+        
+        self.db = DatabaseManager()
+        self.ai = AIEngine()
+        self.img_gen = ImageGenerator()
+        
+        self.characters = load_json(CHAR_FILE, DEFAULT_CHAR)
+
+        local_user_data = load_json(USER_FILE, DEFAULT_USER)
+        
+        db_personas = []
+        if self.current_user_id:
+            try:
+                db_personas = self.db.get_user_personas(self.current_user_id)
+            except Exception as e:
+                print(f"Could not retrieve personas from database: {e}")
+
+
+        if db_personas:
+            self.user_data = {
+                "username": self.current_username,  
+                "personas": db_personas,
+                "favorites": local_user_data.get("favorites", [])
+            }
+        else:
+            self.user_data = local_user_data
+            self.user_data["username"] = self.current_username
+
+        if "favorites" not in self.user_data:
+            self.user_data["favorites"] = []
+            
+        self.current_char = None
+        self.is_generating = False
+        self.current_ai_bubble = None
+        
+        self.setup_ui()
+
+    def setup_ui(self):
+        self.setWindowFlags(Qt.WindowType.FramelessWindowHint)
+        self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
+        
+        main_widget = QWidget()
+        main_widget.setStyleSheet("background-color: #18181b; border: 1px solid #27272a;")
+        self.setCentralWidget(main_widget)
+        
+        main_layout = QVBoxLayout(main_widget)
+        main_layout.setContentsMargins(0, 0, 0, 0)
+        main_layout.setSpacing(0)
+        
+        self.title_bar = CustomTitleBar(self)
+        main_layout.addWidget(self.title_bar)
+        
+        content_area = QWidget()
+        content_layout = QHBoxLayout(content_area)
+        content_layout.setSpacing(0)
+        content_layout.setContentsMargins(1, 0, 1, 1)
+        
+        self.sidebar = self.create_sidebar()
+        content_layout.addWidget(self.sidebar)
+        
+        self.content_stack = QStackedWidget()
+        self.content_stack.setStyleSheet("background-color: #18181b; border: none;")
+        
+        self.home_page = HomePage(self.characters, self.user_data["favorites"])
+        self.home_page.character_selected.connect(self.select_character)
+        self.home_page.profile_clicked.connect(lambda: self.switch_page("profile")) 
+        self.content_stack.addWidget(self.home_page)
+        
+        self.chat_page = self.create_chat_page()
+        self.content_stack.addWidget(self.chat_page)
+
+        self.chats_list_page = self.setup_chats_list_page()
+        self.content_stack.addWidget(self.chats_list_page)
+        
+        self.settings_page = SettingsPage()
+        self.content_stack.addWidget(self.settings_page)
+
+        self.profile_page = ProfilePage(self.user_data, self.characters)
+        self.profile_page.character_selected.connect(self.select_character)
+        self.profile_page.create_character_clicked.connect(self.open_character_popup)
+        self.profile_page.edit_persona_clicked.connect(self.open_persona_popup)
+        self.profile_page.logout_clicked.connect(self.handle_logout)
+        
+        self.content_stack.addWidget(self.profile_page)
+        
+        content_layout.addWidget(self.content_stack)
+        main_layout.addWidget(content_area)
+
+    def create_sidebar(self) -> QFrame:
+        sidebar = QFrame()
+        sidebar.setFixedWidth(80) 
+        sidebar.setStyleSheet("background-color: #09090b; border-right: 1px solid #27272a;")
+        
+        main_layout = QVBoxLayout(sidebar)
+        main_layout.setContentsMargins(10, 20, 10, 20)
+        main_layout.setSpacing(15)
+
+        self.logo = LogoWidget() 
+        main_layout.addWidget(self.logo, alignment=Qt.AlignmentFlag.AlignCenter)
+        main_layout.addSpacing(10)
+
+        self.nav_container = QWidget()
+        self.nav_container.setStyleSheet("background: transparent; border: none; outline: none;") 
+        self.nav_container.setFocusPolicy(Qt.FocusPolicy.NoFocus)
+        nav_layout = QVBoxLayout(self.nav_container)
+        nav_layout.setContentsMargins(0,0,0,0)
+        
+        self.btn_home = SidebarIconButton("home", tooltip="Home", active=True)
+        self.btn_home.clicked.connect(lambda: self.switch_page("home"))
+        nav_layout.addWidget(self.btn_home)
+        
+        self.btn_chat = SidebarIconButton("chat", tooltip="Chats")
+        self.btn_chat.clicked.connect(lambda: self.switch_page("chats_list"))
+        nav_layout.addWidget(self.btn_chat)
+        
+        main_layout.addWidget(self.nav_container)
+        main_layout.addStretch()
+        
+        self.btn_settings = SidebarIconButton("settings", tooltip="Settings")
+        self.btn_settings.clicked.connect(lambda: self.switch_page("settings"))
+        main_layout.addWidget(self.btn_settings)
+        
+        self.btn_user = SidebarIconButton("user", tooltip="Profile")
+        self.btn_user.clicked.connect(lambda: self.switch_page("profile"))
+        main_layout.addWidget(self.btn_user)
+        
+        return sidebar
+
+    def switch_page(self, page_name):
+        page_map = {"home": 0, "chat": 1, "chats_list": 2, "settings": 3, "profile": 4}
+        index = 0
+        if isinstance(page_name, int):
+            index = page_name
+        else:
+            key = str(page_name).strip().lower()
+            if key.isdigit(): index = int(key)
+            elif key in page_map: index = page_map[key]
+            else: return
+
+        self.content_stack.setCurrentIndex(index)
+        
+        if hasattr(self, 'btn_home'): self.btn_home.set_active(index == 0)
+        if hasattr(self, 'btn_chat'): self.btn_chat.set_active(index == 1 or index == 2)
+        if hasattr(self, 'btn_settings'): self.btn_settings.set_active(index == 3)
+        if hasattr(self, 'btn_user'): self.btn_user.set_active(index == 4)
+        
+        if index == 2: 
+            self.refresh_chats_list()
+        elif index == 4: 
+            self.profile_page.refresh_content(self.user_data, self.characters)
+
+    def handle_logout(self):
+        from src.auth_manager import AuthManager
+        AuthManager.clear_session()
+
+        self.logout_requested.emit() 
+        self.close()
+
+    def setup_chats_list_page(self):
+        page_widget = QWidget()
+        page_widget.setStyleSheet("background-color: #09090b;") 
+        layout = QVBoxLayout(page_widget)
+        layout.setContentsMargins(0, 0, 0, 0)
+        header = QLabel("Chats")
+        header.setStyleSheet("color: #e9edef; font-size: 24px; font-weight: bold; padding: 20px;")
+        layout.addWidget(header)
+        self.chat_list_widget = QListWidget()
+        self.chat_list_widget.setStyleSheet("QListWidget { border: none; background-color: transparent; outline: none; } QListWidget::item { background-color: #18181b; border: 1px solid #27272a; border-radius: 15px; margin-bottom: 12px; padding: 5px; } QListWidget::item:hover { background-color: #1e1e2e; border: 1px solid #6366f1; } QListWidget::item:selected { background-color: #1e1e2e; border: 1px solid #a855f7; }")
+        self.chat_list_widget.itemClicked.connect(self.on_chat_row_clicked)
+        layout.addWidget(self.chat_list_widget)
+        self.refresh_chats_list()
+        return page_widget
+
+    def refresh_chats_list(self):
+        self.chat_list_widget.clear()
+        try:
+            real_chats = []
+            for char_name in self.characters:
+                history = self.db.get_history(char_name)
+                if history and len(history) > 0:
+                    last_msg_row = history[-1] 
+                    last_msg = last_msg_row[2] if len(last_msg_row) > 2 else "..."
+                    if "||IMG:" in last_msg or "<img" in last_msg:
+                        last_msg = "📷 [Image Sent]"
+                    real_chats.append({"id": char_name, "name": char_name, "msg": last_msg, "avatar": char_name[0].upper()})
+            for chat in real_chats: self.add_chat_to_list(chat)
+        except Exception as e: print(f"Error: {e}")
+
+    def add_chat_to_list(self, chat_data):
+        item = QListWidgetItem(self.chat_list_widget)
+        item.setSizeHint(QSize(0, 80))
+        item.setData(Qt.ItemDataRole.UserRole, chat_data["id"])
+        row = ChatRowWidget(chat_data["name"], chat_data["msg"], chat_data["avatar"], lambda: self.pin_chat(chat_data["id"]), lambda: self.delete_chat(item, chat_data["name"]))
+        self.chat_list_widget.setItemWidget(item, row)
+
+    def on_chat_row_clicked(self, item): self.select_character(item.data(Qt.ItemDataRole.UserRole))
+    def pin_chat(self, bot_id): print(f"Pin: {bot_id}")
+    def delete_chat(self, item, bot_name):
+        if QMessageBox.question(self, 'Delete', f"Delete {bot_name}?", QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No) == QMessageBox.StandardButton.Yes:
+            self.db.delete_character_history(bot_name); self.refresh_chats_list()
+
+    def create_chat_page(self) -> QWidget:
+        page = QWidget(); page.setStyleSheet("background-color: #18181b;")
+        layout = QVBoxLayout(page); layout.setContentsMargins(0, 0, 0, 0); layout.setSpacing(0)
+        self.chat_header = QFrame(); self.chat_header.setFixedHeight(70); self.chat_header.setStyleSheet("background-color: #18181b; border-bottom: 1px solid #27272a;")
+        header_layout = QHBoxLayout(self.chat_header); header_layout.setContentsMargins(20, 0, 20, 0)
+        btn_back = SidebarIconButton("back", "Back"); btn_back.setFixedSize(40, 40); btn_back.clicked.connect(lambda: self.switch_page("chats_list")); header_layout.addWidget(btn_back)
+        self.chat_avatar = QLabel(); self.chat_avatar.setFixedSize(44, 44); self.chat_avatar.setAlignment(Qt.AlignmentFlag.AlignCenter); self.chat_avatar.setStyleSheet("background-color: #6366f1; border-radius: 22px; color: white; font-size: 18px; font-weight: bold;")
+        header_layout.addWidget(self.chat_avatar); self.chat_title = QLabel("Character Name"); self.chat_title.setStyleSheet("color: #ffffff; font-size: 18px; font-weight: 600; margin-left: 12px;"); header_layout.addWidget(self.chat_title); header_layout.addStretch()
+        self.btn_favorite = SidebarIconButton("heart", "Add to Favorites"); self.btn_favorite.setFixedSize(40, 40); self.btn_favorite.clicked.connect(self.toggle_favorite); header_layout.addWidget(self.btn_favorite)
+        btn_export = SidebarIconButton("share", "Share Character"); btn_export.setFixedSize(40, 40); btn_export.clicked.connect(self.export_current_character); header_layout.addWidget(btn_export)
+        btn_clear = SidebarIconButton("trash", "Delete Chat"); btn_clear.setFixedSize(40, 40); btn_clear.clicked.connect(self.clear_history); header_layout.addWidget(btn_clear); layout.addWidget(self.chat_header)
+        self.msg_scroll = SmoothScrollArea(); self.msg_container = QWidget(); self.msg_container.setStyleSheet("background: transparent;"); self.msg_layout = QVBoxLayout(self.msg_container)
+        self.msg_layout.setSpacing(16); self.msg_layout.setContentsMargins(60, 30, 60, 30); self.msg_layout.addStretch(); self.msg_scroll.setWidget(self.msg_container); layout.addWidget(self.msg_scroll)
+        input_frame = QFrame(); input_frame.setFixedHeight(90); input_frame.setStyleSheet("background-color: #18181b;"); input_layout = QHBoxLayout(input_frame); input_layout.setContentsMargins(60, 15, 60, 25)
+        text_container = QFrame(); text_container.setMaximumWidth(800); text_container.setFixedHeight(52); text_container.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed); text_container.setStyleSheet("QFrame { background-color: #27272a; border-radius: 26px; border: 1px solid #3f3f46; }")
+        text_inner = QHBoxLayout(text_container); text_inner.setContentsMargins(24, 0, 12, 0); text_inner.setSpacing(12)
+        self.input_field = QTextEdit(); self.input_field.setPlaceholderText("Type a message... (Use /img for images)"); self.input_field.setFixedHeight(36); self.input_field.setStyleSheet("background: transparent; border: none; color: #e4e4e7; font-size: 15px; padding-top: 8px;"); self.input_field.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff); self.input_field.installEventFilter(self)
+        self.btn_send = SendButton(); self.btn_send.setFixedSize(40, 40); self.btn_send.clicked.connect(self.send_message); text_inner.addWidget(self.input_field, 1); text_inner.addWidget(self.btn_send, 0, Qt.AlignmentFlag.AlignVCenter); input_layout.addStretch(1); input_layout.addWidget(text_container, 10); input_layout.addStretch(1); layout.addWidget(input_frame)
+        return page
+
+    def select_character(self, name: str):
+        self.current_char = name
+        self.chat_title.setText(name)
+        char_data = self.characters.get(name, {})
+        custom_avatar = char_data.get("avatar")
+        if custom_avatar and os.path.exists(custom_avatar):
+            avatar_path = custom_avatar.replace('\\', '/')
+            self.chat_avatar.setText(""); self.chat_avatar.setStyleSheet(f"background-image: url({avatar_path}); background-position: center; border-radius: 22px; border: 1px solid #3f3f46;")
+        else:
+            self.chat_avatar.setText(name[0].upper()); self.chat_avatar.setStyleSheet("background-color: #6366f1; border-radius: 22px; color: white; font-size: 18px; font-weight: bold;")
+        self.btn_favorite.icon_type = "heart_filled" if name in self.user_data.get("favorites", []) else "heart"; self.btn_favorite.update()
+        self.load_chat_history(); self.switch_page("chat")
+
+    def load_chat_history(self):
+        while self.msg_layout.count() > 1:
+            child = self.msg_layout.takeAt(0); 
+            if child.widget(): child.widget().deleteLater()
+        history = self.db.get_history(self.current_char); user_name = self.user_data["personas"][0]["name"]
+        if not history and self.current_char:
+            greeting = self.characters.get(self.current_char, {}).get("greeting", "")
+            if greeting: self.add_bubble(greeting, "assistant", user_name=user_name)
+        for row in history: self.add_bubble(row[2], row[1], row[0], user_name)
+        QTimer.singleShot(100, self.msg_scroll.scroll_to_bottom)
+
+    def add_bubble(self, text: str, role: str, msg_id: int = None, user_name: str = "You"):
+        bubble = ChatBubble(text, role, user_name, self.current_char or "AI", msg_id); bubble.rewind_requested.connect(self.rewind_chat); self.msg_layout.insertWidget(self.msg_layout.count() - 1, bubble); return bubble
+
+    def eventFilter(self, obj, event):
+        if obj == self.input_field and event.type() == event.Type.KeyPress:
+            if event.key() in (Qt.Key.Key_Return, Qt.Key.Key_Enter) and not event.modifiers(): self.send_message(); return True
+        return super().eventFilter(obj, event)
+
+    def send_message(self):
+        text = self.input_field.toPlainText().strip()
+        if not text or not self.current_char or self.is_generating: return
+
+        if text.startswith("/img "):
+            prompt = text[5:].strip()
+            self.input_field.clear()
+            self.is_generating = True
+            self.btn_send.setDisabled(True)
+            self.input_field.setReadOnly(True)
+            self.input_field.setPlaceholderText("Generating Image (This may take a moment)...")
+            
+            self.add_bubble(text, "user", user_name="You")
+            self.db.save_message(self.current_char, "user", text)
+            
+            self.current_ai_bubble = self.add_bubble("🎨 *Painting...*", "assistant")
+            self.msg_scroll.scroll_to_bottom()
+            
+            self.img_worker = ImageGenWorker(self.img_gen, prompt)
+            self.img_worker.finished.connect(self.on_image_ready)
+            self.img_worker.error.connect(self.on_image_error)
+            self.img_worker.start()
+            return
+
+        self.input_field.clear(); self.is_generating = True; self.btn_send.setDisabled(True); self.input_field.setReadOnly(True); self.input_field.setPlaceholderText("AI is typing...")
+        self.add_bubble(text, "user", user_name="You"); self.db.save_message(self.current_char, "user", text)
+        self.current_ai_bubble = self.add_bubble("...", "assistant"); self.msg_scroll.scroll_to_bottom()
+        full_history = self.db.get_history(self.current_char); recent_history = full_history[-20:] if len(full_history) > 20 else full_history
+        history_payload = [(row[1], row[2]) for row in recent_history]; persona_txt = f"Name: {self.user_data['personas'][0]['name']}\nDetail: {self.user_data['personas'][0]['description']}"
+        system_prompt = self.characters[self.current_char]["prompt"]
+        self.worker = AIWorker(self.ai, system_prompt, persona_txt, history_payload, text); self.worker.token_received.connect(self.on_ai_token); self.worker.finished.connect(self.on_ai_finished); self.worker.error.connect(lambda e: QMessageBox.critical(self, "Error", e)); self.worker.start()
+
+    def on_image_ready(self, file_path):
+        self.is_generating = False
+        self.btn_send.setDisabled(False)
+        self.input_field.setReadOnly(False)
+        self.input_field.setPlaceholderText("Type a message...")
+        self.input_field.setFocus()
+        
+        safe_path = file_path.replace("\\", "/")
+        html_content = f"||IMG:{safe_path}||"
+        
+        if self.current_ai_bubble:
+            self.current_ai_bubble.update_text(html_content)
+            self.db.save_message(self.current_char, "assistant", html_content)
+            self.current_ai_bubble = None
+        
+        self.msg_scroll.scroll_to_bottom()
+
+    def on_image_error(self, error_msg):
+        self.is_generating = False
+        self.btn_send.setDisabled(False)
+        self.input_field.setReadOnly(False)
+        self.input_field.setPlaceholderText("Type a message...")
+        
+        if self.current_ai_bubble:
+            self.current_ai_bubble.update_text(f"❌ Error: {error_msg}")
+            self.current_ai_bubble = None
+
+    def on_ai_token(self, token: str):
+        if self.current_ai_bubble:
+            if self.current_ai_bubble.text_content == "...": self.current_ai_bubble.update_text("")
+            self.current_ai_bubble.append_text(token); scrollbar = self.msg_scroll.verticalScrollBar()
+            if scrollbar.value() >= scrollbar.maximum() - 20: self.msg_scroll.scroll_to_bottom()
+
+    def on_ai_finished(self):
+        self.is_generating = False; self.btn_send.setDisabled(False); self.input_field.setReadOnly(False); self.input_field.setPlaceholderText("Type a message..."); self.input_field.setFocus()
+        if self.current_ai_bubble: self.db.save_message(self.current_char, "assistant", self.current_ai_bubble.text_content); self.current_ai_bubble = None
+
+    def stop_generation(self):
+        if hasattr(self, 'worker') and self.worker.isRunning(): self.worker.stop_flag = True; self.worker.wait()
+        if hasattr(self, 'img_worker') and self.img_worker.isRunning(): self.img_worker.terminate(); self.img_worker.wait() # Image threadini zorla durdur
+        self.is_generating = False; self.btn_send.setDisabled(False); self.input_field.setReadOnly(False)
+
+    def rewind_chat(self, msg_id: int):
+        if QMessageBox.question(self, "Rewind", "All messages after this will be deleted. Are you sure?") == QMessageBox.StandardButton.Yes: self.db.rewind_history(self.current_char, msg_id); self.load_chat_history()
+
+    def clear_history(self):
+        if not self.current_char: return
+        if QMessageBox.question(self, "Confirm", "Delete all chat history?") == QMessageBox.StandardButton.Yes: self.stop_generation(); self.db.delete_character_history(self.current_char); self.load_chat_history()
+
+    def open_character_popup(self):
+        popup = CharacterPopup(self); popup.character_saved.connect(self.save_new_character); popup.exec()
+
+    def save_new_character(self, char_data_package: dict):
+        name, prompt, greeting, source_avatar_path = char_data_package["name"], char_data_package["prompt"], char_data_package["greeting"], char_data_package.get("avatar_source_path")
+        new_char_data = {"prompt": prompt, "greeting": greeting, "avatar": None}
+        if source_avatar_path and os.path.exists(source_avatar_path):
+            try:
+                avatar_dir = os.path.join("assets", "avatars"); os.makedirs(avatar_dir, exist_ok=True)
+                _, ext = os.path.splitext(source_avatar_path); safe_name = "".join([c for c in name if c.isalnum() or c in (' ', '_', '-')]).strip()
+                target_path = os.path.join(avatar_dir, f"{safe_name}{ext}"); shutil.copy2(source_avatar_path, target_path); new_char_data["avatar"] = target_path.replace("\\", "/")
+            except Exception as e: print(f"Could not save avatar: {e}")
+        self.characters[name] = new_char_data; save_json(CHAR_FILE, self.characters)
+        
+        if self.content_stack.currentIndex() == 4:
+            self.profile_page.refresh_content(self.user_data, self.characters)
+            
+        self.select_character(name); QMessageBox.information(self, "Success", f"'{name}' created successfully!")
+
+    def open_persona_popup(self):
+        current_personas = self.user_data.get("personas", [])
+        popup = PersonaPopup(self, current_personas, self.save_persona); popup.exec()
+
+    def save_persona(self, personas: list):
+        self.user_data["personas"] = personas
+        
+        if self.current_user_id:
+            try:
+                self.db.update_user_personas(self.current_user_id, personas)
+            except Exception as e:
+                print(f"Could not write persona to database: {e}")
+
+        save_json(USER_FILE, self.user_data)
+        
+        if self.content_stack.currentIndex() == 4:
+            self.profile_page.refresh_content(self.user_data, self.characters)
+
+    def export_current_character(self):
+        if not self.current_char: return
+        char_data = self.characters[self.current_char]
+        img_b64 = image_to_base64(char_data.get("avatar")) if char_data.get("avatar") else None
+        export_data = {"name": self.current_char, "prompt": char_data.get("prompt"), "greeting": char_data.get("greeting"), "avatar_image": img_b64}
+        path, _ = QFileDialog.getSaveFileName(self, "Save", f"{self.current_char}.json", "JSON (*.json)")
+        if path:
+            with open(path, "w") as f: json.dump(export_data, f, indent=4)
+            with open(path, "w") as f: json.dump(export_data, f, indent=4)
+            QMessageBox.information(self, "OK", "Saved")
+
+    def toggle_favorite(self):
+        if not self.current_char: return
+        favs = self.user_data.get("favorites", [])
+        if self.current_char in favs: favs.remove(self.current_char); self.btn_favorite.icon_type = "heart"
+        else: favs.append(self.current_char); self.btn_favorite.icon_type = "heart_filled"
+        self.user_data["favorites"] = favs; self.btn_favorite.update(); save_json(USER_FILE, self.user_data)
+
+    def save_user_data(self):
+        with open(USER_FILE, "w", encoding="utf-8") as f: json.dump(self.user_data, f, ensure_ascii=False, indent=2)
+
+    def closeEvent(self, event): self.stop_generation(); event
+
+# ==========================================
+# FILE: src/ui/popups.py
+# ==========================================
+"""
+
+Modern PyQt6 Popups - Character.ai Style
+
+Tam ve Düzenlenmiş Sürüm (Avatar Destekli Persona - FIX)
+
+"""
+
+
+
+from PyQt6.QtWidgets import (
+
+    QDialog, QVBoxLayout, QLabel, QLineEdit, QTextEdit, 
+
+    QPushButton, QHBoxLayout, QComboBox, QMessageBox, QFileDialog, QFrame, QWidget
+
+)
+
+from PyQt6.QtCore import Qt, pyqtSignal
+
+from PyQt6.QtGui import QCursor
+
+from src.ui.components import CustomTitleBar
+
+
+
+class CharacterPopup(QDialog):
+
+    character_saved = pyqtSignal(dict)
+
+
+
+    def __init__(self, parent=None):
+
+        super().__init__(parent)
+
+        self.avatar_path = None
+
+        self.setup_ui()
+
+
+
+    def setup_ui(self):
+
+        self.setWindowFlags(Qt.WindowType.FramelessWindowHint | Qt.WindowType.Dialog)
+
+        self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
+
+        self.setFixedSize(450, 650)
+
+        
+
+        layout = QVBoxLayout(self)
+
+        layout.setContentsMargins(0, 0, 0, 0)
+
+        
+
+        self.bg_frame = QFrame()
+
+        self.bg_frame.setStyleSheet("background-color: #18181b; border: 1px solid #3f3f46; border-radius: 12px;")
+
+        layout.addWidget(self.bg_frame)
+
+        
+
+        inner_layout = QVBoxLayout(self.bg_frame)
+
+        inner_layout.setContentsMargins(0, 0, 0, 0)
+
+        
+
+        self.title_bar = CustomTitleBar(self)
+
+        self.title_bar.findChild(QLabel).setText("Create New Character")
+
+        btn_max = self.title_bar.findChild(QPushButton, "btn_max")
+
+        if btn_max: btn_max.hide()
+
+        inner_layout.addWidget(self.title_bar)
+
+        
+
+        content_widget = QWidget()
+
+        
+
+        self.form_layout = QVBoxLayout(content_widget)
+
+        self.form_layout.setContentsMargins(24, 20, 24, 24)
+
+        self.form_layout.setSpacing(12)
+
+        
+
+        avatar_layout = QHBoxLayout()
+
+        avatar_layout.addStretch()
+
+        self.btn_avatar = QPushButton("Select Avatar")
+
+        self.btn_avatar.setFixedSize(80, 80)
+
+        self.btn_avatar.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
+
+        self.btn_avatar.setStyleSheet("QPushButton { background-color: #27272a; color: #a1a1aa; border-radius: 40px; border: 2px dashed #3f3f46; font-size: 11px; } QPushButton:hover { border-color: #6366f1; color: #6366f1; }")
+
+        self.btn_avatar.clicked.connect(self.select_avatar)
+
+        avatar_layout.addWidget(self.btn_avatar)
+
+        avatar_layout.addStretch()
+
+        self.form_layout.addLayout(avatar_layout)
+
+        
+
+        self.inp_name = self.create_input("Character Name", "Ex: Benjamin")
+
+        self.form_layout.addWidget(self.inp_name)
+
+        
+
+        self.inp_prompt = self.create_text_input("System Prompt (Personality)", "How should the character behave?", 100)
+
+        self.form_layout.addWidget(self.inp_prompt)
+
+
+
+        self.inp_greeting = self.create_text_input("First Message (Greeting)", "What will it say to the user first?", 60)
+
+        self.form_layout.addWidget(self.inp_greeting)
+
+        
+
+        self.form_layout.addStretch()
+
+        
+
+        btn_layout = QHBoxLayout()
+
+        self.btn_cancel = QPushButton("Cancel")
+
+        self.btn_cancel.setFixedHeight(40)
+
+        self.btn_cancel.setStyleSheet("QPushButton { background-color: transparent; color: #a1a1aa; border: 1px solid #3f3f46; border-radius: 8px; font-weight: 600; } QPushButton:hover { background-color: #27272a; color: white; }")
+
+        self.btn_cancel.clicked.connect(self.close)
+
+        
+
+        self.btn_save = QPushButton("Create")
+
+        self.btn_save.setFixedHeight(40)
+
+        self.btn_save.setStyleSheet("QPushButton { background-color: #6366f1; color: white; border: none; border-radius: 8px; font-weight: 600; } QPushButton:hover { background-color: #4f46e5; }")
+
+        self.btn_save.clicked.connect(self.save_character)
+
+        
+
+        btn_layout.addWidget(self.btn_cancel)
+
+        btn_layout.addWidget(self.btn_save)
+
+        self.form_layout.addLayout(btn_layout)
+
+        
+
+        inner_layout.addWidget(content_widget)
+
+
+
+    def create_input(self, label_text, placeholder):
+
+        label = QLabel(label_text)
+
+        label.setStyleSheet("color: #e4e4e7; font-weight: 600; font-size: 13px;")
+
+        line_edit = QLineEdit()
+
+        line_edit.setPlaceholderText(placeholder)
+
+        line_edit.setFixedHeight(40)
+
+        line_edit.setStyleSheet("QLineEdit { background-color: #27272a; color: white; border: 1px solid #3f3f46; border-radius: 8px; padding: 8px; } QLineEdit:focus { border: 1px solid #6366f1; }")
+
+        
+
+        self.form_layout.addWidget(label)
+
+        return line_edit
+
+
+
+    def create_text_input(self, label_text, placeholder, height):
+
+        label = QLabel(label_text)
+
+        label.setStyleSheet("color: #e4e4e7; font-weight: 600; font-size: 13px;")
+
+        text_edit = QTextEdit()
+
+        text_edit.setPlaceholderText(placeholder)
+
+        text_edit.setFixedHeight(height)
+
+        text_edit.setStyleSheet("QTextEdit { background-color: #27272a; color: white; border: 1px solid #3f3f46; border-radius: 8px; padding: 8px; } QTextEdit:focus { border: 1px solid #6366f1; }")
+
+        
+
+        self.form_layout.addWidget(label)
+
+        return text_edit
+
+
+
+    def select_avatar(self):
+
+        file_name, _ = QFileDialog.getOpenFileName(self, "Select Avatar", "", "Image Files (*.png *.jpg *.jpeg)")
+
+        if file_name:
+
+            self.avatar_path = file_name
+
+            self.btn_avatar.setText("")
+
+            file_path = file_name.replace('\\', '/')
+            self.btn_avatar.setStyleSheet(f"QPushButton {{ background-color: #27272a; border: 2px solid #6366f1; border-radius: 40px; border-image: url({file_path}) 0 0 0 0 stretch stretch; }}")
+
+
+
+    def save_character(self):
+
+        name = self.inp_name.text().strip()
+
+        prompt = self.inp_prompt.toPlainText().strip()
+
+        greeting = self.inp_greeting.toPlainText().strip()
+
+        
+
+        if not name or not prompt:
+
+            QMessageBox.warning(self, "Missing Information", "Please fill in at least the Name and Prompt fields.")
+
+            return
+
+            
+
+        char_data_package = {
+
+            "name": name, "prompt": prompt, "greeting": greeting, "avatar_source_path": self.avatar_path 
+
+        }
+
+        self.character_saved.emit(char_data_package)
+
+        self.accept()
+
+
+
+class PersonaPopup(QDialog):
+
+    def __init__(self, parent, user_personas_list, on_save_callback):
+
+        super().__init__(parent)
+
+        self.personas = user_personas_list
+
+        self.on_save = on_save_callback
+
+        self.avatar_path = None
+
+        
+
+        if not self.personas:
+
+            self.personas = [{"name": "Default", "gender": "Prefer not to say", "description": "", "avatar": None}]
+
+        
+
+        self.setup_ui()
+
+        self.load_persona(0)
+
+
+
+    def setup_ui(self):
+
+        self.setWindowFlags(Qt.WindowType.FramelessWindowHint | Qt.WindowType.Dialog)
+
+        self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
+
+        self.setFixedSize(500, 650)
+
+        
+
+        layout = QVBoxLayout(self)
+
+        layout.setContentsMargins(0, 0, 0, 0)
+
+        
+
+        self.bg_frame = QFrame()
+
+        self.bg_frame.setStyleSheet("background-color: #18181b; border: 1px solid #3f3f46; border-radius: 12px;")
+
+        layout.addWidget(self.bg_frame)
+
+        
+
+        inner_layout = QVBoxLayout(self.bg_frame)
+
+        inner_layout.setContentsMargins(0, 0, 0, 0)
+
+        
+
+        self.title_bar = CustomTitleBar(self)
+
+        self.title_bar.findChild(QLabel).setText("Profile Management")
+
+        btn_max = self.title_bar.findChild(QPushButton, "btn_max")
+
+        if btn_max: btn_max.hide()
+
+        inner_layout.addWidget(self.title_bar)
+
+        
+
+        content_widget = QWidget()
+
+        
+
+        self.form_layout = QVBoxLayout(content_widget)
+
+        self.form_layout.setContentsMargins(24, 20, 24, 24)
+
+        self.form_layout.setSpacing(15)
+
+
+
+        self.combo_personas = QComboBox()
+
+        self.combo_personas.setFixedHeight(40)
+
+        self.combo_personas.setStyleSheet("QComboBox { background-color: #27272a; color: white; border: 1px solid #3f3f46; border-radius: 8px; padding: 5px; } QComboBox::drop-down { border: none; }")
+
+        self.combo_personas.currentIndexChanged.connect(self.load_persona)
+
+        self.form_layout.addWidget(self.combo_personas)
+
+
+
+        avatar_layout = QHBoxLayout()
+
+        avatar_layout.addStretch()
+
+        self.btn_avatar = QPushButton("Profile Picture")
+
+        self.btn_avatar.setFixedSize(80, 80)
+
+        self.btn_avatar.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
+
+        self.btn_avatar.setStyleSheet("QPushButton { background-color: #27272a; color: #a1a1aa; border-radius: 40px; border: 2px dashed #3f3f46; font-size: 11px; } QPushButton:hover { border-color: #6366f1; color: #6366f1; }")
+
+        self.btn_avatar.clicked.connect(self.select_avatar)
+
+        avatar_layout.addWidget(self.btn_avatar)
+
+        avatar_layout.addStretch()
+
+        self.form_layout.addLayout(avatar_layout)
+
+
+
+        self.entry_name = self.create_input("Profile Name", "")
+
+        self.form_layout.addWidget(self.entry_name)
+
+        
+
+        lbl_gender = QLabel("Gender")
+
+        lbl_gender.setStyleSheet("color: #e4e4e7; font-weight: 600; font-size: 13px;")
+
+        self.form_layout.addWidget(lbl_gender)
+
+
+
+        self.combo_gender = QComboBox()
+
+        self.combo_gender.addItems(["Prefer not to say", "Male", "Female"])
+
+        self.combo_gender.setFixedHeight(40)
+
+        self.combo_gender.setStyleSheet("""
+
+            QComboBox { 
+
+                background-color: #27272a; color: white; 
+
+                border: 1px solid #3f3f46; border-radius: 8px; padding: 5px; padding-left: 10px;
+
+            }
+
+            QComboBox::drop-down { border: none; }
+
+            QComboBox:on { border: 1px solid #6366f1; }
+
+        """)
+
+        self.form_layout.addWidget(self.combo_gender)
+
+
+
+        self.entry_desc = self.create_text_input("About (AI will know this)", "What should it know about you?", 100)
+
+        self.form_layout.addWidget(self.entry_desc)
+
+
+
+        btn_layout = QHBoxLayout()
+
+        self.btn_delete = QPushButton("Delete")
+
+        self.btn_delete.setFixedHeight(40)
+
+        self.btn_delete.setStyleSheet("QPushButton { background-color: transparent; color: #ef4444; border: 1px solid #ef4444; border-radius: 8px; font-weight: 600; } QPushButton:hover { background-color: rgba(239, 68, 68, 0.1); }")
+
+        self.btn_delete.clicked.connect(self.delete_persona)
+
+        
+
+        self.btn_save = QPushButton("Save")
+
+        self.btn_save.setFixedHeight(40)
+
+        self.btn_save.setStyleSheet("QPushButton { background-color: #6366f1; color: white; border: none; border-radius: 8px; font-weight: 600; } QPushButton:hover { background-color: #4f46e5; }")
+
+        self.btn_save.clicked.connect(self.save)
+
+        
+
+        btn_layout.addWidget(self.btn_delete)
+
+        btn_layout.addWidget(self.btn_save)
+
+        self.form_layout.addLayout(btn_layout)
+
+        
+
+        inner_layout.addWidget(content_widget)
+
+        self.refresh_combo()
+
+
+
+    def create_input(self, label_text, placeholder):
+
+        label = QLabel(label_text)
+
+        label.setStyleSheet("color: #e4e4e7; font-weight: 600; font-size: 13px;")
+
+        line_edit = QLineEdit()
+
+        line_edit.setPlaceholderText(placeholder)
+
+        line_edit.setFixedHeight(40)
+
+        line_edit.setStyleSheet("QLineEdit { background-color: #27272a; color: white; border: 1px solid #3f3f46; border-radius: 8px; padding: 8px; } QLineEdit:focus { border: 1px solid #6366f1; }")
+
+        self.form_layout.addWidget(label)
+
+        return line_edit
+
+
+
+    def create_text_input(self, label_text, placeholder, height):
+
+        label = QLabel(label_text)
+
+        label.setStyleSheet("color: #e4e4e7; font-weight: 600; font-size: 13px;")
+
+        text_edit = QTextEdit()
+
+        text_edit.setPlaceholderText(placeholder)
+
+        text_edit.setFixedHeight(height)
+
+        text_edit.setStyleSheet("QTextEdit { background-color: #27272a; color: white; border: 1px solid #3f3f46; border-radius: 8px; padding: 8px; } QTextEdit:focus { border: 1px solid #6366f1; }")
+
+        self.form_layout.addWidget(label)
+
+        return text_edit
+
+
+
+    def refresh_combo(self):
+
+        self.combo_personas.blockSignals(True)
+
+        self.combo_personas.clear()
+
+        self.combo_personas.addItems([p["name"] for p in self.personas])
+
+        self.combo_personas.addItem("+ Create New Profile")
+
+        self.combo_personas.blockSignals(False)
+
+
+
+    def select_avatar(self):
+
+        file_name, _ = QFileDialog.getOpenFileName(self, "Select Profile Picture", "", "Image Files (*.png *.jpg *.jpeg)")
+
+        if file_name:
+
+            self.avatar_path = file_name
+
+            self.update_avatar_preview(file_name)
+
+
+
+    def update_avatar_preview(self, path):
+
+        if path:
+
+            self.btn_avatar.setText("") 
+
+            path_fixed = path.replace('\\', '/')
+            self.btn_avatar.setStyleSheet(f"QPushButton {{ background-color: #27272a; border: 2px solid #6366f1; border-radius: 40px; border-image: url('{path_fixed}') 0 0 0 0 stretch stretch; }}")
+
+        else:
+
+            self.btn_avatar.setText("Profile Picture")
+
+            self.btn_avatar.setStyleSheet("QPushButton { background-color: #27272a; color: #a1a1aa; border-radius: 40px; border: 2px dashed #3f3f46; font-size: 11px; } QPushButton:hover { border-color: #6366f1; color: #6366f1; }")
+
+
+
+    def load_persona(self, index):
+
+        if index < len(self.personas):
+
+            p = self.personas[index]
+
+            self.entry_name.setText(p["name"])
+
+            
+
+            gender_val = p.get("gender", "Prefer not to say")
+
+            index_cb = self.combo_gender.findText(gender_val)
+
+            if index_cb >= 0:
+
+                self.combo_gender.setCurrentIndex(index_cb)
+
+            else:
+
+                self.combo_gender.setCurrentIndex(0)
+
+
+
+            self.entry_desc.setText(p.get("description", ""))
+
+            
+
+            self.avatar_path = p.get("avatar")
+
+            self.update_avatar_preview(self.avatar_path)
+
+            
+
+            is_default = (index == 0)
+
+            self.entry_name.setEnabled(not is_default)
+
+            self.btn_delete.setEnabled(not is_default)
+
+        else:
+
+            self.entry_name.clear()
+
+            self.combo_gender.setCurrentIndex(0)
+
+            self.entry_desc.clear()
+
+            self.avatar_path = None
+
+            self.update_avatar_preview(None)
+
+            self.entry_name.setEnabled(True)
+
+            self.btn_delete.setEnabled(False)
+
+
+
+    def save(self):
+
+        name = self.entry_name.text().strip()
+
+        if not name:
+
+            QMessageBox.warning(self, "Error", "Profile name cannot be empty!")
+
+            return
+
+
+
+        new_persona = {
+
+            "name": name,
+
+            "gender": self.combo_gender.currentText(),
+
+            "description": self.entry_desc.toPlainText().strip(),
+
+            "avatar": self.avatar_path
+
+        }
+
+
+
+        current_idx = self.combo_personas.currentIndex()
+
+        if current_idx < len(self.personas):
+
+            self.personas[current_idx] = new_persona
+
+        else:
+
+            self.personas.append(new_persona)
+
+
+
+        self.on_save(self.personas)
+
+        self.accept()
+
+
+
+    def delete_persona(self):
+
+        current_idx = self.combo_personas.currentIndex()
+
+        if current_idx >= len(self.personas): return 
+
+        
+
+        confirm = QMessageBox.question(self, "Confirm", "Are you sure you want to delete this profile?", QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
+
+        
+
+        if confirm == QMessageBox.StandardButton.Yes:
+
+            del self.personas[current_idx]
+
+            self.on_save(self.personas)
+
+            self.accept()
+
+# ==========================================
+# FILE: src/ui/__init__.py
+# ==========================================
+
+
+# ==========================================
+# FILE: src/ui/components/base.py
+# ==========================================
+import os
+
+from functools import lru_cache
+
+from PyQt6.QtGui import QPixmap, QPainter, QPainterPath, QBrush, QColor, QFont, QLinearGradient
+
+from PyQt6.QtCore import Qt, QRect
+
+from PyQt6.QtWidgets import QScrollArea, QFrame
+
+
+
+@lru_cache(maxsize=32)
+
+def load_avatar_pixmap(name: str, size: int, fallback_color: str) -> QPixmap:
+
+    """Avatar resmi yükler veya oluşturur (önbellekli)"""
+
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+
+    project_root = os.path.dirname(os.path.dirname(os.path.dirname(current_dir)))
+
+    
+
+    valid_extensions = ['.png', '.jpg', '.jpeg', '.webp']
+
+    image_path = None
+
+    
+
+    safe_name = "".join([c for c in name if c.isalpha() or c.isdigit() or c in (' ', '_', '-')]).strip()
+
+    
+
+    for ext in valid_extensions:
+
+        path = os.path.join(project_root, "assets", "avatars", safe_name + ext)
+
+        if os.path.exists(path):
+
+            image_path = path
+
+            break
+
+    
+
+    pixmap = QPixmap(size, size)
+
+    pixmap.fill(Qt.GlobalColor.transparent)
+
+    
+
+    painter = QPainter(pixmap)
+
+    painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+
+    
+
+    path = QPainterPath()
+
+    path.addEllipse(0, 0, size, size)
+
+    painter.setClipPath(path)
+
+    
+
+    if image_path:
+
+        img = QPixmap(image_path)
+
+        scaled_img = img.scaled(size, size, Qt.AspectRatioMode.KeepAspectRatioByExpanding, 
+
+                               Qt.TransformationMode.SmoothTransformation)
+
+        painter.drawPixmap(0, 0, scaled_img)
+
+    else:
+
+        painter.setBrush(QBrush(QColor(fallback_color)))
+
+        painter.setPen(Qt.PenStyle.NoPen)
+
+        painter.drawEllipse(0, 0, size, size)
+
+        
+
+        painter.setPen(QColor("white"))
+
+        font = QFont("Segoe UI", int(size/2.5), QFont.Weight.Bold)
+
+        painter.setFont(font)
+
+        painter.drawText(QRect(0, 0, size, size), Qt.AlignmentFlag.AlignCenter, name[0].upper())
+
+    
+
+    painter.end()
+
+    return pixmap
+
+
+
+class SmoothScrollArea(QScrollArea):
+
+    """Smooth scroll ile ScrollArea - Hem Yatay Hem Dikey Destekli"""
+
+    
+
+    def __init__(self, orientation="vertical", parent=None):
+
+        super().__init__(parent)
+
+        self.setWidgetResizable(True)
+
+        self.setFrameShape(QFrame.Shape.NoFrame)
+
+        
+
+        if orientation == "horizontal":
+
+            self.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
+
+            self.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+
+        else:
+
+            self.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+
+            self.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
+
+            
+
+        self.setStyleSheet("""
+
+            QScrollArea {
+
+                border: none;
+
+                background-color: transparent;
+
+            }
+
+            QScrollBar:vertical {
+
+                background-color: #0a0a0a;
+
+                width: 8px;
+
+                border-radius: 4px;
+
+                margin: 0px;
+
+            }
+
+            QScrollBar::handle:vertical {
+
+                background-color: #333;
+
+                border-radius: 4px;
+
+                min-height: 30px;
+
+            }
+
+            QScrollBar::handle:vertical:hover {
+
+                background-color: #444;
+
+            }
+
+            QScrollBar:horizontal {
+
+                background-color: #0a0a0a;
+
+                height: 8px;
+
+                border-radius: 4px;
+
+                margin: 0px;
+
+            }
+
+            QScrollBar::handle:horizontal {
+
+                background-color: #333;
+
+                border-radius: 4px;
+
+                min-width: 30px;
+
+            }
+
+            QScrollBar::handle:horizontal:hover {
+
+                background-color: #444;
+
+            }
+
+            QScrollBar::add-line, QScrollBar::sub-line {
+
+                height: 0px;
+
+                width: 0px;
+
+            }
+
+            QScrollBar::add-page, QScrollBar::sub-page {
+
+                background: none;
+
+            }
+
+        """)
+
+        
+
+    def scroll_to_bottom(self):
+
+        """En alta kaydır"""
+
+        scrollbar = self.verticalScrollBar()
+
+        scrollbar.setValue(scrollbar.maximum())
+
+
+
+class GradientFrame(QFrame):
+
+    def __init__(self, colors=None, parent=None):
+
+        super().__init__(parent)
+
+        self.colors = colors or ["#1a1a2e", "#16213e", "#0f3460"]
+
+        
+
+    def paintEvent(self, event):
+
+        painter = QPainter(self)
+
+        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+
+        gradient = QLinearGradient(0, 0, self.width(), self.height())
+
+        for i, color in enumerate(self.colors):
+
+            gradient.setColorAt(i / max(len(self.colors) - 1, 1), QColor(color))
+
+        
+
+        painter.setBrush(QBrush(gradient))
+
+        painter.setPen(Qt.PenStyle.NoPen)
+
+        painter.drawRect(self.rect())
+
+# ==========================================
+# FILE: src/ui/components/branding.py
+# ==========================================
+from PyQt6.QtWidgets import QWidget
+
+from PyQt6.QtCore import Qt
+
+from PyQt6.QtGui import QPainter, QColor, QPainterPath, QBrush, QLinearGradient, QPen
+
+
+
+class LogoWidget(QWidget):
+
+    """Modern logo widget - gradient ve animasyon"""
+
+    
+
+    def __init__(self, parent=None):
+
+        super().__init__(parent)
+
+        self.setFixedSize(48, 48)
+
+        self._angle = 0
+
+        
+
+    def paintEvent(self, event):
+
+        painter = QPainter(self)
+
+        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+
+        
+
+        cx, cy = self.width() // 2, self.height() // 2
+
+        
+
+        gradient = QLinearGradient(0, 0, self.width(), self.height())
+
+        gradient.setColorAt(0, QColor("#6366f1"))
+
+        gradient.setColorAt(1, QColor("#a855f7"))
+
+        
+
+        painter.setBrush(QBrush(gradient))
+
+        painter.setPen(Qt.PenStyle.NoPen)
+
+        painter.drawEllipse(4, 4, 40, 40)
+
+        
+
+        pen = QPen(QColor("white"), 2)
+
+        pen.setCapStyle(Qt.PenCapStyle.RoundCap)
+
+        painter.setPen(pen)
+
+        
+
+        painter.setBrush(QBrush(QColor("white")))
+
+        painter.drawEllipse(cx - 8, cy - 4, 6, 6)
+
+        painter.drawEllipse(cx + 2, cy - 4, 6, 6)
+
+        
+
+        path = QPainterPath()
+
+        path.moveTo(cx - 6, cy + 4)
+
+        path.quadTo(cx, cy + 10, cx + 6, cy + 4)
+
+        painter.setBrush(Qt.BrushStyle.NoBrush)
+
+        painter.drawPath(path)
+
+        
+
+        painter.end()
+
+# ==========================================
+# FILE: src/ui/components/cards.py
+# ==========================================
+from PyQt6.QtWidgets import QFrame, QHBoxLayout, QVBoxLayout, QLabel, QPushButton, QGraphicsDropShadowEffect, QWidget
+
+from PyQt6.QtCore import Qt, pyqtSignal, QRect
+
+from PyQt6.QtGui import QCursor, QPainter, QColor, QPainterPath, QFont, QBrush, QLinearGradient, QPixmap
+
+from .base import load_avatar_pixmap
+
+import random
+
+import os
+
+
+
+class CharacterCard(QFrame):
+
+    """Modern karakter kartı - Character.ai tarzı"""
+
+    
+
+    clicked = pyqtSignal(str)
+
+    
+
+    def __init__(self, name: str, data: dict, is_selected: bool = False, parent=None):
+
+        super().__init__(parent)
+
+        self.name = name
+
+        self.is_selected = is_selected
+
+        self.setup_ui(data)
+
+        
+
+    def setup_ui(self, data: dict):
+
+        self.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
+
+        self.setFixedHeight(72)
+
+        
+
+        self._default_style = self._get_style(self.is_selected, False)
+
+        self._hover_style = self._get_style(self.is_selected, True)
+
+        self.setStyleSheet(self._default_style)
+
+        
+
+        layout = QHBoxLayout(self)
+
+        layout.setContentsMargins(12, 10, 12, 10)
+
+        layout.setSpacing(12)
+
+        
+
+        avatar_color = "#2563eb" if self.is_selected else "#374151"
+
+        self.avatar = QLabel()
+
+        self.avatar.setFixedSize(48, 48)
+
+        self.avatar.setPixmap(load_avatar_pixmap(self.name, 48, avatar_color))
+
+        layout.addWidget(self.avatar)
+
+        
+
+        info_layout = QVBoxLayout()
+
+        info_layout.setSpacing(2)
+
+        
+
+        self.name_label = QLabel(self.name)
+
+        self.name_label.setStyleSheet("""
+
+            QLabel {
+
+                color: #f5f5f5;
+
+                font-size: 15px;
+
+                font-weight: 600;
+
+                font-family: 'Segoe UI', sans-serif;
+
+            }
+
+        """)
+
+        info_layout.addWidget(self.name_label)
+
+        
+
+        preview_text = data.get("greeting", "") or data.get("prompt", "")
+
+        preview_text = (preview_text[:40] + "...") if len(preview_text) > 40 else preview_text
+
+        self.preview_label = QLabel(preview_text or "No description")
+
+        self.preview_label.setStyleSheet("""
+
+            QLabel {
+
+                color: #888;
+
+                font-size: 13px;
+
+                font-family: 'Segoe UI', sans-serif;
+
+            }
+
+        """)
+
+        info_layout.addWidget(self.preview_label)
+
+        
+
+        layout.addLayout(info_layout)
+
+        layout.addStretch()
+
+        
+
+    def _get_style(self, selected: bool, hover: bool) -> str:
+
+        if selected:
+
+            bg = "#1e3a5f"
+
+            border = "#2563eb"
+
+        elif hover:
+
+            bg = "#252525"
+
+            border = "transparent"
+
+        else:
+
+            bg = "transparent"
+
+            border = "transparent"
+
+            
+
+        return f"""
+
+            CharacterCard {{
+
+                background-color: {bg};
+
+                border: 2px solid {border};
+
+                border-radius: 12px;
+
+            }}
+
+        """
+
+        
+
+    def enterEvent(self, event):
+
+        if not self.is_selected:
+
+            self.setStyleSheet(self._hover_style)
+
+        super().enterEvent(event)
+
+        
+
+    def leaveEvent(self, event):
+
+        self.setStyleSheet(self._default_style)
+
+        super().leaveEvent(event)
+
+        
+
+    def mousePressEvent(self, event):
+
+        if event.button() == Qt.MouseButton.LeftButton:
+
+            self.clicked.emit(self.name)
+
+        super().mousePressEvent(event)
+
+
+
+class FeaturedCharacterCard(QFrame):
+
+    """Öne çıkan karakter kartı - büyük, resimli, animasyonlu"""
+
+    
+
+    clicked = pyqtSignal(str)
+
+    
+
+    GRADIENTS = [
+
+        ["#667eea", "#764ba2"],
+
+        ["#f093fb", "#f5576c"],
+
+        ["#4facfe", "#00f2fe"],
+
+        ["#43e97b", "#38f9d7"],
+
+        ["#fa709a", "#fee140"],
+
+        ["#a8edea", "#fed6e3"],
+
+        ["#ff9a9e", "#fecfef"],
+
+        ["#667eea", "#764ba2"],
+
+        ["#f6d365", "#fda085"],
+
+        ["#89f7fe", "#66a6ff"],
+
+    ]
+
+    
+
+    def __init__(self, name: str, data: dict, parent=None):
+
+        super().__init__(parent)
+
+        self.name = name
+
+        self.data = data
+
+        self.gradient = random.choice(self.GRADIENTS)
+
+        self._hovered = False
+
+        self._scale = 1.0
+
+        self._hover_offset = 0
+
+        self.avatar_pixmap = None
+
+        self.load_avatar()
+
+        self.setup_ui()
+
+        
+
+    def load_avatar(self):
+
+        current_dir = os.path.dirname(os.path.abspath(__file__)) 
+
+        project_root = os.path.dirname(os.path.dirname(os.path.dirname(current_dir)))
+
+        
+
+        valid_extensions = ['.png', '.jpg', '.jpeg', '.webp']
+
+        safe_name = "".join([c for c in self.name if c.isalpha() or c.isdigit() or c in (' ', '_', '-')]).strip()
+
+        
+
+        for ext in valid_extensions:
+
+            path = os.path.join(project_root, "assets", "avatars", safe_name + ext)
+
+            if os.path.exists(path):
+
+                self.avatar_pixmap = QPixmap(path)
+
+                break
+
+        
+
+    def setup_ui(self):
+
+        self.setFixedSize(160, 200)
+
+        self.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
+
+        self.setStyleSheet("background: transparent;")
+
+        
+
+        layout = QVBoxLayout(self)
+
+        layout.setContentsMargins(0, 0, 0, 0)
+
+        layout.setSpacing(0)
+
+        
+
+        spacer = QWidget()
+
+        spacer.setFixedSize(160, 130)
+
+        spacer.setStyleSheet("background: transparent;")
+
+        layout.addWidget(spacer)
+
+        
+
+        info_frame = QFrame()
+
+        info_frame.setFixedHeight(70)
+
+        info_frame.setStyleSheet("background: transparent;")
+
+        info_layout = QVBoxLayout(info_frame)
+
+        info_layout.setContentsMargins(12, 8, 12, 12)
+
+        info_layout.setSpacing(2)
+
+        
+
+        display_name = self.name if len(self.name) <= 18 else self.name[:15] + "..."
+
+        name_label = QLabel(display_name)
+
+        name_label.setStyleSheet("""
+
+            color: #ffffff;
+
+            font-size: 14px;
+
+            font-weight: 600;
+
+            font-family: 'Segoe UI', sans-serif;
+
+            background: transparent;
+
+        """)
+
+        name_label.setWordWrap(False)
+
+        name_label.setMaximumHeight(20)
+
+        info_layout.addWidget(name_label)
+
+        
+
+        desc = self.data.get("greeting", self.data.get("prompt", ""))[:25]
+
+        desc_label = QLabel(desc + "..." if len(desc) == 25 else desc)
+
+        desc_label.setStyleSheet("""
+
+            color: #8e8ea0;
+
+            font-size: 11px;
+
+            font-family: 'Segoe UI', sans-serif;
+
+            background: transparent;
+
+        """)
+
+        desc_label.setWordWrap(False)
+
+        desc_label.setMaximumHeight(16)
+
+        info_layout.addWidget(desc_label)
+
+        
+
+        layout.addWidget(info_frame)
+
+        
+
+        self.shadow = QGraphicsDropShadowEffect()
+
+        self.shadow.setBlurRadius(20)
+
+        self.shadow.setColor(QColor(0, 0, 0, 80))
+
+        self.shadow.setOffset(0, 5)
+
+        self.setGraphicsEffect(self.shadow)
+
+        
+
+    def paintEvent(self, event):
+
+        painter = QPainter(self)
+
+        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+
+        
+
+        card_path = QPainterPath()
+
+        card_path.addRoundedRect(0, 0, 160, 200, 16, 16)
+
+        painter.setClipPath(card_path)
+
+        painter.setClipPath(card_path)
+
+        
+
+        if self.avatar_pixmap:
+
+            scaled = self.avatar_pixmap.scaled(160, 130, 
+
+                Qt.AspectRatioMode.KeepAspectRatioByExpanding,
+
+                Qt.TransformationMode.SmoothTransformation)
+
+            x = (160 - scaled.width()) // 2
+
+            y = (130 - scaled.height()) // 2
+
+            painter.drawPixmap(x, y, scaled)
+
+        else:
+
+            gradient = QLinearGradient(0, 0, 160, 130)
+
+            gradient.setColorAt(0, QColor(self.gradient[0]))
+
+            gradient.setColorAt(1, QColor(self.gradient[1]))
+
+            
+
+            painter.setBrush(QBrush(gradient))
+
+            painter.setPen(Qt.PenStyle.NoPen)
+
+            painter.drawRect(0, 0, 160, 130)
+
+            
+
+            painter.setPen(QColor(255, 255, 255, 200))
+
+            font = QFont("Segoe UI", 48, QFont.Weight.Bold)
+
+            painter.setFont(font)
+
+            painter.drawText(QRect(0, 0, 160, 130), Qt.AlignmentFlag.AlignCenter, self.name[0].upper())
+
+        
+
+        painter.setBrush(QColor("#1e1e2e"))
+
+        painter.setPen(Qt.PenStyle.NoPen)
+
+        painter.drawRect(0, 130, 160, 70)
+
+        
+
+        painter.setClipping(False)
+
+        
+
+    def mousePressEvent(self, event):
+
+        if event.button() == Qt.MouseButton.LeftButton:
+
+            self.clicked.emit(self.name)
+
+        super().mousePressEvent(event)
+
+        
+
+    def enterEvent(self, event):
+
+        self._hovered = True
+
+        self.shadow.setBlurRadius(30)
+
+        self.shadow.setOffset(0, 8)
+
+        self.shadow.setColor(QColor(99, 102, 241, 100))
+
+        self.move(self.x(), self.y() - 5)
+
+        super().enterEvent(event)
+
+        
+
+    def leaveEvent(self, event):
+
+        self._hovered = False
+
+        self.shadow.setBlurRadius(20)
+
+        self.shadow.setOffset(0, 5)
+
+        self.shadow.setColor(QColor(0, 0, 0, 80))
+
+        self.move(self.x(), self.y() + 5)
+
+        super().leaveEvent(event)
+
+
+
+class SuggestionCard(QFrame):
+
+    """Öneri kartı - "Try saying" için"""
+
+    
+
+    clicked = pyqtSignal(str)
+
+    
+
+    def __init__(self, text: str, parent=None):
+
+        super().__init__(parent)
+
+        self.text = text
+
+        self.setup_ui()
+
+        
+
+    def setup_ui(self):
+
+        self.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
+
+        self.setStyleSheet("""
+
+            SuggestionCard {
+
+                background-color: #2a2a3a;
+
+                border: 1px solid #3a3a4a;
+
+                border-radius: 12px;
+
+            }
+
+            SuggestionCard:hover {
+
+                background-color: #3a3a4a;
+
+                border: 1px solid #4a4a5a;
+
+            }
+
+        """)
+
+        
+
+        layout = QVBoxLayout(self)
+
+        layout.setContentsMargins(16, 12, 16, 12)
+
+        
+
+        label = QLabel(f'"{self.text}"')
+
+        label.setStyleSheet("""
+
+            color: #c0c0c0;
+
+            font-size: 13px;
+
+            font-family: 'Segoe UI', sans-serif;
+
+            font-style: italic;
+
+        """)
+
+        label.setWordWrap(True)
+
+        layout.addWidget(label)
+
+        
+
+    def mousePressEvent(self, event):
+
+        if event.button() == Qt.MouseButton.LeftButton:
+
+            self.clicked.emit(self.text)
+
+        super().mousePressEvent(event)
+
+
+
+class QuickActionCard(QFrame):
+
+    """Hızlı aksiyon kartı - ikonlu"""
+
+    
+
+    clicked = pyqtSignal(str)
+
+    
+
+    ICONS = {
+
+        "language": "🌍",
+
+        "trip": "✈️",
+
+        "book": "📚",
+
+        "interview": "💼",
+
+        "story": "📝",
+
+        "decision": "🤔",
+
+        "brainstorm": "💡",
+
+        "game": "🎮",
+
+        "escape": "🤖",
+
+    }
+
+    
+
+    COLORS = {
+
+        "language": "#4facfe",
+
+        "trip": "#f093fb",
+
+        "book": "#43e97b",
+
+        "interview": "#fa709a",
+
+        "story": "#667eea",
+
+        "decision": "#f6d365",
+
+        "brainstorm": "#ff9a9e",
+
+        "game": "#89f7fe",
+
+        "escape": "#a8edea",
+
+    }
+
+    
+
+    def __init__(self, action_type: str, text: str, parent=None):
+
+        super().__init__(parent)
+
+        self.action_type = action_type
+
+        self.text = text
+
+        self.setup_ui()
+
+        
+
+    def setup_ui(self):
+
+        self.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
+
+        self.setStyleSheet("""
+
+            QuickActionCard {
+
+                background-color: #1e1e2e;
+
+                border: 1px solid #2a2a3a;
+
+                border-radius: 12px;
+
+            }
+
+            QuickActionCard:hover {
+
+                background-color: #2a2a3a;
+
+            }
+
+        """)
+
+        
+
+        layout = QHBoxLayout(self)
+
+        layout.setContentsMargins(16, 12, 16, 12)
+
+        layout.setSpacing(12)
+
+        
+
+        icon_label = QLabel(self.ICONS.get(self.action_type, "✨"))
+
+        icon_label.setStyleSheet(f"""
+
+            background-color: {self.COLORS.get(self.action_type, '#667eea')}33;
+
+            padding: 8px;
+
+            border-radius: 8px;
+
+            font-size: 18px;
+
+        """)
+
+        icon_label.setFixedSize(40, 40)
+
+        icon_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+        layout.addWidget(icon_label)
+
+        
+
+        text_label = QLabel(self.text)
+
+        text_label.setStyleSheet("""
+
+            color: #e0e0e0;
+
+            font-size: 14px;
+
+            font-family: 'Segoe UI', sans-serif;
+
+        """)
+
+        layout.addWidget(text_label)
+
+        layout.addStretch()
+
+        
+
+    def mousePressEvent(self, event):
+
+        if event.button() == Qt.MouseButton.LeftButton:
+
+            self.clicked.emit(self.action_type)
+
+        super().mousePressEvent(event)
+
+
+
+class HistoryItem(QPushButton):
+
+    """Sidebar'daki sohbet geçmişi satırı"""
+
+    def __init__(self, char_data, parent=None):
+
+        super().__init__(parent)
+
+        self.setFixedHeight(64)
+
+        self.setCursor(Qt.CursorShape.PointingHandCursor)
+
+        self.setFocusPolicy(Qt.FocusPolicy.NoFocus)
+
+        self.setStyleSheet("QPushButton { background: transparent; border: none; text-align: left; border-radius: 10px; } QPushButton:hover { background-color: #1e1e1e; }")
+
+        
+
+        layout = QHBoxLayout(self)
+
+        layout.setContentsMargins(12, 8, 12, 8)
+
+        layout.setSpacing(12)
+
+        
+
+        self.avatar = QLabel()
+
+        self.avatar.setFixedSize(44, 44)
+
+        self.avatar.setPixmap(load_avatar_pixmap(char_data['name'], 44, "#6366f1"))
+
+        layout.addWidget(self.avatar)
+
+        
+
+        text_container = QVBoxLayout()
+
+        text_container.setSpacing(2)
+
+        name_label = QLabel(char_data['name'])
+
+        name_label.setStyleSheet("color: #e4e4e7; font-weight: 600; font-size: 14px; border: none;")
+
+        text_container.addWidget(name_label)
+
+        
+
+        preview_label = QLabel("Continue chat...")
+
+        preview_label.setStyleSheet("color: #71717a; font-size: 12px; border: none;")
+
+        text_container.addWidget(preview_label)
+
+        
+
+        layout.addLayout(text_container)
+
+        layout.addStretch()
+
+# ==========================================
+# FILE: src/ui/components/chat.py
+# ==========================================
+from PyQt6.QtWidgets import QFrame, QHBoxLayout, QVBoxLayout, QLabel, QSizePolicy, QMenu, QApplication, QPushButton
+
+from PyQt6.QtCore import Qt, pyqtSignal, QTimer
+
+from PyQt6.QtGui import QPainter, QColor, QPen, QBrush, QPainterPath, QCursor
+
+import re
+
+from .base import load_avatar_pixmap
+
+
+
+from PyQt6.QtWidgets import QFrame, QHBoxLayout, QVBoxLayout, QLabel, QSizePolicy, QMenu, QApplication
+
+from PyQt6.QtCore import pyqtSignal, Qt
+
+from PyQt6.QtGui import QAction
+
+import re
+
+
+
+
+
+class ChatBubble(QFrame):
+
+    """Modern mesaj balonu"""
+
+    rewind_requested = pyqtSignal(int)
+    generate_image_requested = pyqtSignal(str)
+
+    
+
+    def __init__(self, text: str, role: str, user_name: str = "You", 
+
+                 char_name: str = "AI", msg_id: int = None, parent=None):
+
+        super().__init__(parent)
+
+        self.msg_id = msg_id
+
+        self.text_content = text
+
+        self.is_user = (role == "user")
+
+        self._current_text = text
+
+        self.setup_ui(user_name, char_name)
+
+        self.update_text(text)
+
+    
+
+    def setup_ui(self, user_name: str, char_name: str):
+
+        main_layout = QHBoxLayout(self)
+
+        main_layout.setContentsMargins(10, 5, 10, 5)
+
+        main_layout.setSpacing(10)
+
+        
+
+        if self.is_user:
+
+            bg_color = "#2563eb"
+
+            text_color = "#ffffff"
+
+            avatar_color = "#1d4ed8"
+
+        else:
+
+            bg_color = "#1e1e1e"
+
+            text_color = "#e5e5e5"
+
+            avatar_color = "#374151"
+
+        
+
+        target_name = user_name if self.is_user else char_name
+
+        self.avatar = QLabel()
+
+        self.avatar.setFixedSize(40, 40)
+
+        
+
+        self.bubble_container = QFrame()
+
+        self.bubble_container.setMaximumWidth(500)
+
+        self.bubble_container.setStyleSheet(f"""
+
+            QFrame {{
+
+                background-color: {bg_color};
+
+                border-radius: 18px;
+
+                padding: 0px;
+
+                border: none;
+
+            }}
+
+        """)
+
+        
+
+        bubble_layout = QVBoxLayout(self.bubble_container)
+
+        bubble_layout.setContentsMargins(16, 12, 16, 12)
+
+        bubble_layout.setSpacing(0)
+
+        
+
+        self.msg_label = QLabel()
+
+        self.msg_label.setWordWrap(True)
+
+        self.msg_label.setTextFormat(Qt.TextFormat.RichText)
+
+        
+
+        self.msg_label.setTextInteractionFlags(
+
+            Qt.TextInteractionFlag.TextSelectableByMouse | 
+
+            Qt.TextInteractionFlag.LinksAccessibleByMouse
+
+        )
+
+        
+
+        self.msg_label.setStyleSheet(f"""
+
+            QLabel {{
+
+                color: {text_color};
+
+                font-size: 14px;
+
+                font-family: 'Segoe UI', sans-serif;
+
+                background: transparent;
+
+                padding: 0px;
+
+                selection-background-color: #555; /* Seçilen metin rengi */
+
+                border: none;
+
+            }}
+
+        """)
+
+        self.msg_label.setSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Minimum)
+
+        
+
+        self.msg_label.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
+        self.msg_label.setOpenExternalLinks(True)
+
+        self.msg_label.customContextMenuRequested.connect(self.show_context_menu)
+
+        bubble_layout.addWidget(self.msg_label)
+
+        if not self.is_user:
+            self.btn_gen_img = QPushButton("🎨")
+            self.btn_gen_img.setToolTip("Görsel Oluştur")
+            self.btn_gen_img.setCursor(Qt.CursorShape.PointingHandCursor)
+            self.btn_gen_img.setFixedSize(28, 28)
+            self.btn_gen_img.setStyleSheet("""
+                QPushButton {
+                    background-color: transparent;
+                    color: #a1a1aa;
+                    border: none;
+                    border-radius: 14px;
+                    font-size: 14px;
+                }
+                QPushButton:hover {
+                    background-color: rgba(255, 255, 255, 0.1);
+                    color: white;
+                }
+            """)
+            self.btn_gen_img.clicked.connect(self.request_image_generation)
+            
+            btn_layout = QHBoxLayout()
+            btn_layout.addStretch()
+            btn_layout.addWidget(self.btn_gen_img)
+            btn_layout.setContentsMargins(0, 5, 0, 0)
+            
+            bubble_layout.addLayout(btn_layout)
+
+        
+
+        if self.is_user:
+
+            main_layout.addStretch()
+
+            main_layout.addWidget(self.bubble_container)
+
+            main_layout.addWidget(self.avatar, alignment=Qt.AlignmentFlag.AlignTop)
+
+        else:
+
+            main_layout.addWidget(self.avatar, alignment=Qt.AlignmentFlag.AlignTop)
+
+            main_layout.addWidget(self.bubble_container)
+
+            main_layout.addStretch()
+
+        
+
+    
+
+    def update_text(self, text: str):
+
+        self._current_text = text
+
+        self.text_content = text
+
+        formatted_text = self._format_markdown(text)
+
+        self.msg_label.setText(formatted_text)
+
+    
+
+    def append_text(self, text: str):
+
+        try:
+
+            self._current_text += text
+
+            self.text_content = self._current_text
+
+            formatted_text = self._format_markdown(self._current_text)
+
+            self.msg_label.setText(formatted_text)
+
+        except RuntimeError:
+
+            pass
+
+    
+
+    def _format_markdown(self, text: str) -> str:
+
+        text = text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+
+        text = re.sub(r'\*\*\*(.*?)\*\*\*', r'<b><i>\1</i></b>', text)
+
+        text = re.sub(r'\*\*(.*?)\*\*', r'<b>\1</b>', text)
+
+        text = re.sub(r'\*(.*?)\*', r'<i>\1</i>', text)
+
+        def img_replacer(match):
+            path = match.group(1)
+            if ":" in path and not path.startswith("file:///"):
+                url = "file:///" + path.replace("\\", "/")
+            else:
+                url = path
+            return f'<br><a href="{url}"><img src="{url}" width="350"></a><br>'
+        text = re.sub(r'\|\|IMG:(.*?)\|\|', img_replacer, text)
+        
+        text = text.replace("\n", "<br>")
+
+        return text
+
+    
+
+    def show_context_menu(self, pos):
+
+        """Menü artık Label üzerinden tetikleniyor"""
+
+        if self.msg_id is None:
+
+            return
+
+        
+
+        menu = QMenu(self)
+
+        menu.setStyleSheet("""
+
+            QMenu {
+
+                background-color: #1e1e1e;
+
+                border: 1px solid #333;
+
+                border-radius: 8px;
+
+                padding: 5px;
+
+            }
+
+            QMenu::item {
+
+                color: #e5e5e5;
+
+                padding: 8px 20px;
+
+                border-radius: 4px;
+
+            }
+
+            QMenu::item:selected {
+
+                background-color: #333;
+
+            }
+
+        """)
+
+        
+
+        if self.msg_label.hasSelectedText():
+
+            copy_selection_action = menu.addAction("✂️ Copy Selection")
+
+            copy_selection_action.triggered.connect(self.copy_selection)
+
+        
+
+        copy_all_action = menu.addAction("📋 Copy All")
+
+        copy_all_action.triggered.connect(self.copy_text)
+
+        
+
+        rewind_action = menu.addAction("⏪ Rewind to Here")
+
+        rewind_action.triggered.connect(lambda: self.rewind_requested.emit(self.msg_id))
+
+        
+
+        menu.exec(self.msg_label.mapToGlobal(pos))
+
+    
+
+    def copy_selection(self):
+
+        """Sadece seçili kısmı kopyalar"""
+
+        clipboard = QApplication.clipboard()
+
+        clipboard.setText(self.msg_label.selectedText())
+
+
+
+    def copy_text(self):
+
+        """Tüm metni kopyalar"""
+
+        clipboard = QApplication.clipboard()
+
+        clipboard.setText(self.text_content)
+
+    
+
+    def set_message_id(self, msg_id: int):
+
+        self.msg_id = msg_id
+
+
+
+class TypingIndicator(QFrame):
+
+    """AI yazıyor animasyonu görseli"""
+
+    def __init__(self, parent=None):
+
+        super().__init__(parent)
+
+        self.setFixedSize(70, 35)
+
+        self.setStyleSheet("background-color: #1f2937; border-radius: 15px; border: none;")
+
+        layout = QHBoxLayout(self)
+
+        layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+        self.lbl = QLabel("...")
+
+        self.lbl.setStyleSheet("color: #10a37f; font-weight: bold; font-size: 18px; border: none;")
+
+        layout.addWidget(self.lbl)
+
+        
+
+        self.dots = [QLabel("●") for _ in range(3)]
+
+        self.current_dot = 0
+
+        
+
+
+
+class SendButton(QPushButton):
+
+    """Modern gönder butonu - Yeşil ok"""
+
+    
+
+    def __init__(self, parent=None):
+
+        super().__init__(parent)
+
+        self.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
+
+        self.setFixedSize(40, 40)
+
+        self.setStyleSheet("""
+
+            QPushButton {
+
+                background-color: #10a37f;
+
+                border: none;
+
+                border-radius: 8px;
+
+            }
+
+            QPushButton:hover {
+
+                background-color: #0e906f;
+
+            }
+
+            QPushButton:disabled {
+
+                background-color: #1a3a2f;
+
+            }
+
+        """)
+
+        
+
+    def paintEvent(self, event):
+
+        super().paintEvent(event)
+
+        painter = QPainter(self)
+
+        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+
+        
+
+        painter.setPen(Qt.PenStyle.NoPen)
+
+        painter.setBrush(QBrush(QColor("white")))
+
+        
+
+        path = QPainterPath()
+
+        cx, cy = self.width() // 2, self.height() // 2
+
+        path.moveTo(cx - 6, cy - 6)
+
+        path.lineTo(cx + 6, cy)
+
+        path.lineTo(cx - 6, cy + 6)
+
+        path.lineTo(cx - 3, cy)
+
+        path.closeSubpath()
+
+        
+
+        painter.drawPath(path)
+
+        painter.end()
+
+# ==========================================
+# FILE: src/ui/components/inputs.py
+# ==========================================
+from PyQt6.QtWidgets import QPushButton, QFrame, QHBoxLayout, QLineEdit, QWidget
+
+from PyQt6.QtCore import Qt, pyqtSignal, QPoint
+
+from PyQt6.QtGui import QCursor, QPainter, QColor, QPen, QBrush, QPainterPath
+
+
+
+class ModernButton(QPushButton):
+
+    """Modern buton - animasyonlu"""
+
+    
+
+    def __init__(self, text: str, primary: bool = False, danger: bool = False, parent=None):
+
+        super().__init__(text, parent)
+
+        self.primary = primary
+
+        self.danger = danger
+
+        self.setup_style()
+
+        self.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
+
+        
+
+    def setup_style(self):
+
+        if self.primary:
+
+            bg = "#2563eb"
+
+            hover_bg = "#1d4ed8"
+
+            text_color = "white"
+
+        elif self.danger:
+
+            bg = "transparent"
+
+            hover_bg = "#dc2626"
+
+            text_color = "#ef4444"
+
+        else:
+
+            bg = "#333"
+
+            hover_bg = "#444"
+
+            text_color = "#e5e5e5"
+
+            
+
+        self.setStyleSheet(f"""
+
+            QPushButton {{
+
+                background-color: {bg};
+
+                color: {text_color};
+
+                border: none;
+
+                border-radius: 10px;
+
+                padding: 12px 20px;
+
+                font-size: 14px;
+
+                font-weight: 500;
+
+                font-family: 'Segoe UI', sans-serif;
+
+            }}
+
+            QPushButton:hover {{
+
+                background-color: {hover_bg};
+
+                color: white;
+
+            }}
+
+            QPushButton:pressed {{
+
+                background-color: {hover_bg};
+
+            }}
+
+            QPushButton:disabled {{
+
+                background-color: #1a1a1a;
+
+                color: #555;
+
+            }}
+
+        """)
+
+
+
+class CategoryTab(QPushButton):
+
+    """Kategori sekmesi butonu"""
+
+    
+
+    def __init__(self, text: str, active: bool = False, parent=None):
+
+        super().__init__(text, parent)
+
+        self.active = active
+
+        self.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
+
+        self.setFixedHeight(36)
+
+        self.update_style()
+
+        
+
+    def update_style(self):
+
+        if self.active:
+
+            self.setStyleSheet("""
+
+                QPushButton {
+
+                    background-color: #3b3b4f;
+
+                    color: #ffffff;
+
+                    border: none;
+
+                    border-radius: 18px;
+
+                    padding: 8px 20px;
+
+                    font-size: 13px;
+
+                    font-weight: 600;
+
+                    font-family: 'Segoe UI', sans-serif;
+
+                }
+
+            """)
+
+        else:
+
+            self.setStyleSheet("""
+
+                QPushButton {
+
+                    background-color: transparent;
+
+                    color: #8e8ea0;
+
+                    border: none;
+
+                    border-radius: 18px;
+
+                    padding: 8px 20px;
+
+                    font-size: 13px;
+
+                    font-weight: 500;
+
+                    font-family: 'Segoe UI', sans-serif;
+
+                }
+
+                QPushButton:hover {
+
+                    background-color: #2a2a3a;
+
+                    color: #ffffff;
+
+                }
+
+            """)
+
+            
+
+    def set_active(self, active: bool):
+
+        self.active = active
+
+        self.update_style()
+
+
+
+class IconButton(QPushButton):
+
+    """Modern ikon buton - SVG tabanlı güzel ikonlar"""
+
+    
+
+    ICONS = {
+
+        "share": '''<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+
+            <path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8"/>
+
+            <polyline points="16 6 12 2 8 6"/>
+
+            <line x1="12" y1="2" x2="12" y2="15"/>
+
+        </svg>''',
+
+        "download": '''<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+
+            <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+
+            <polyline points="7 10 12 15 17 10"/>
+
+            <line x1="12" y1="15" x2="12" y2="3"/>
+
+        </svg>''',
+
+        "user": '''<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+
+            <circle cx="12" cy="8" r="4"/>
+
+            <path d="M4 20c0-4 4-6 8-6s8 2 8 6"/>
+
+        </svg>''',
+
+        "trash": '''<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+
+            <path d="M3 6h18M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2"/>
+
+            <path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6"/>
+
+            <path d="M10 11v6M14 11v6"/>
+
+        </svg>''',
+
+        "send": '''<svg viewBox="0 0 24 24" fill="currentColor">
+
+            <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+
+        </svg>''',
+
+        "plus": '''<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+
+            <path d="M12 5v14M5 12h14"/>
+
+        </svg>''',
+
+        "settings": '''<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+
+            <circle cx="12" cy="12" r="3"/>
+
+            <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/>
+
+        </svg>''',
+
+    }
+
+    
+
+    def __init__(self, icon_name: str, tooltip: str = "", danger: bool = False, parent=None):
+
+        super().__init__(parent)
+
+        self.icon_name = icon_name
+
+        self.danger = danger
+
+        self.setToolTip(tooltip)
+
+        self.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
+
+        self.setFixedSize(40, 40)
+
+        self.setFocusPolicy(Qt.FocusPolicy.NoFocus)
+
+        self.setup_style()
+
+        
+
+    def setup_style(self):
+
+        if self.danger:
+
+            self.setStyleSheet("""
+
+                QPushButton {
+
+                    background-color: transparent;
+
+                    border: none;
+
+                    border-radius: 8px;
+
+                    outline: none;
+
+                }
+
+                QPushButton:hover {
+
+                    background-color: rgba(239, 68, 68, 0.2);
+
+                }
+
+            """)
+
+            self.icon_color = "#ef4444"
+
+        else:
+
+            self.setStyleSheet("""
+
+                QPushButton {
+
+                    background-color: #2a2a2a;
+
+                    border: none;
+
+                    border-radius: 8px;
+
+                    outline: none;
+
+                }
+
+                QPushButton:hover {
+
+                    background-color: #3a3a3a;
+
+                }
+
+            """)
+
+            self.icon_color = "#a0a0a0"
+
+            
+
+    def paintEvent(self, event):
+
+        super().paintEvent(event)
+
+        painter = QPainter(self)
+
+        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+
+        
+
+        icon_size = 20
+
+        x = (self.width() - icon_size) // 2
+
+        y = (self.height() - icon_size) // 2
+
+        
+
+        painter.setPen(QColor(self.icon_color))
+
+        painter.setBrush(Qt.BrushStyle.NoBrush)
+
+        
+
+        if self.icon_name == "user":
+
+            painter.drawEllipse(x + 5, y + 2, 10, 10)
+
+            path = QPainterPath()
+
+            path.moveTo(x + 2, y + 18)
+
+            path.quadTo(x + 10, y + 10, x + 18, y + 18)
+
+            painter.drawPath(path)
+
+        elif self.icon_name == "trash":
+
+            painter.drawRect(x + 4, y + 5, 12, 14)
+
+            painter.drawLine(x + 2, y + 5, x + 18, y + 5)
+
+            painter.drawLine(x + 7, y + 2, x + 13, y + 2)
+
+            painter.drawLine(x + 7, y + 2, x + 7, y + 5)
+
+            painter.drawLine(x + 13, y + 2, x + 13, y + 5)
+
+            painter.drawLine(x + 8, y + 8, x + 8, y + 16)
+
+            painter.drawLine(x + 12, y + 8, x + 12, y + 16)
+
+        elif self.icon_name == "plus":
+
+            painter.drawLine(x + 10, y + 3, x + 10, y + 17)
+
+            painter.drawLine(x + 3, y + 10, x + 17, y + 10)
+
+            
+
+        painter.end()
+
+
+
+class SearchIconWidget(QWidget):
+
+    """Arama ikonu widget"""
+
+    
+
+    def __init__(self, parent=None):
+
+        super().__init__(parent)
+
+        self.setFixedSize(20, 20)
+
+        
+
+    def paintEvent(self, event):
+
+        painter = QPainter(self)
+
+        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+
+        
+
+        pen = QPen(QColor("#71717a"), 2)
+
+        pen.setCapStyle(Qt.PenCapStyle.RoundCap)
+
+        painter.setPen(pen)
+
+        painter.setBrush(Qt.BrushStyle.NoBrush)
+
+        
+
+        painter.drawEllipse(3, 3, 11, 11)
+
+        painter.drawLine(12, 12, 17, 17)
+
+        
+
+        painter.end()
+
+
+
+class SearchBar(QFrame):
+
+    """Modern arama çubuğu"""
+
+    
+
+    search_triggered = pyqtSignal(str)
+
+    
+
+    def __init__(self, parent=None):
+
+        super().__init__(parent)
+
+        self.setup_ui()
+
+        
+
+    def setup_ui(self):
+
+        self.setFixedHeight(44)
+
+        self.setStyleSheet("""
+
+            SearchBar {
+
+                background-color: #2a2a3a;
+
+                border: 1px solid #3a3a4a;
+
+                border-radius: 22px;
+
+            }
+
+        """)
+
+        
+
+        layout = QHBoxLayout(self)
+
+        layout.setContentsMargins(16, 0, 16, 0)
+
+        layout.setSpacing(10)
+
+        
+
+        icon = SearchIconWidget()
+
+        layout.addWidget(icon)
+
+        
+
+        self.input = QLineEdit()
+
+        self.input.setPlaceholderText("Search characters...")
+
+        self.input.setStyleSheet("""
+
+            QLineEdit {
+
+                background: transparent;
+
+                border: none;
+
+                color: #e0e0e0;
+
+                font-size: 14px;
+
+                font-family: 'Segoe UI', sans-serif;
+
+            }
+
+        """)
+
+        self.input.returnPressed.connect(lambda: self.search_triggered.emit(self.input.text()))
+
+        layout.addWidget(self.input)
+
+# ==========================================
+# FILE: src/ui/components/sidebar_items.py
+# ==========================================
+from PyQt6.QtWidgets import QPushButton
+
+from PyQt6.QtCore import Qt
+
+from PyQt6.QtGui import QPainter, QColor, QPainterPath, QPen, QBrush, QCursor
+
+
+
+class SidebarIconButton(QPushButton):
+
+    """Modern sidebar ikon butonu - Custom paint ile çizilen ikonlar"""
+
+    
+
+    def __init__(self, icon_type: str, tooltip: str = "", active: bool = False, parent=None):
+
+        super().__init__(parent)
+
+        self.icon_type = icon_type
+
+        self.active = active
+
+        self.setToolTip(tooltip)
+
+        self.setFixedSize(48, 48)
+
+        self.setCursor(Qt.CursorShape.PointingHandCursor)
+
+        self._hovered = False
+
+        self.setFocusPolicy(Qt.FocusPolicy.NoFocus)
+
+        self.update_style()
+
+        
+
+    def update_style(self):
+
+        bg = "#27272a" if self.active else "transparent"
+
+        self.setStyleSheet(f"""
+
+            QPushButton {{ 
+
+                background-color: {bg}; 
+
+                border: none; 
+
+                outline: none; 
+
+                border-radius: 12px; 
+
+            }} 
+
+            QPushButton:hover {{ 
+
+                background-color: #1f1f23; 
+
+                border: none;
+
+                outline: none;
+
+            }}
+
+            QPushButton:focus {{
+
+                border: none;
+
+                outline: none;
+
+            }}
+
+        """)
+
+    
+
+    def set_active(self, active: bool):
+
+        self.active = active
+
+        self.update_style()
+
+        self.update()
+
+        
+
+    def enterEvent(self, event):
+
+        self._hovered = True
+
+        self.update()
+
+        super().enterEvent(event)
+
+        
+
+    def leaveEvent(self, event):
+
+        self._hovered = False
+
+        self.update()
+
+        super().leaveEvent(event)
+
+        
+
+    def paintEvent(self, event):
+
+        super().paintEvent(event)
+
+        painter = QPainter(self)
+
+        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+
+        
+
+        if self.active:
+
+            color = QColor("#a78bfa")
+
+        elif self._hovered:
+
+            color = QColor("#e4e4e7")
+
+        else:
+
+            color = QColor("#71717a")
+
+        
+
+        pen = QPen(color, 2)
+
+        pen.setCapStyle(Qt.PenCapStyle.RoundCap)
+
+        pen.setJoinStyle(Qt.PenJoinStyle.RoundJoin)
+
+        painter.setPen(pen)
+
+        
+
+        cx, cy = self.width() // 2, self.height() // 2
+
+        
+
+        if self.icon_type == "home":
+
+            path = QPainterPath()
+
+            path.moveTo(cx, cy - 10)
+
+            path.lineTo(cx - 10, cy)
+
+            path.lineTo(cx - 7, cy)
+
+            path.lineTo(cx - 7, cy + 8)
+
+            path.lineTo(cx + 7, cy + 8)
+
+            path.lineTo(cx + 7, cy)
+
+            path.lineTo(cx + 10, cy)
+
+            path.closeSubpath()
+
+            painter.drawPath(path)
+
+            painter.drawRect(cx - 2, cy + 2, 4, 6)
+
+            
+
+        elif self.icon_type == "chat":
+
+            path = QPainterPath()
+
+            path.addRoundedRect(cx - 10, cy - 8, 20, 14, 4, 4)
+
+            painter.drawPath(path)
+
+            painter.drawLine(cx - 4, cy + 6, cx - 8, cy + 10)
+
+            painter.setBrush(QBrush(color))
+
+            painter.drawEllipse(cx - 5, cy - 2, 3, 3)
+
+            painter.drawEllipse(cx - 1, cy - 2, 3, 3)
+
+            painter.drawEllipse(cx + 3, cy - 2, 3, 3)
+
+            
+
+        elif self.icon_type == "create":
+
+            painter.drawLine(cx, cy - 8, cx, cy + 8)
+
+            painter.drawLine(cx - 8, cy, cx + 8, cy)
+
+            painter.drawLine(cx - 5, cy - 5, cx + 5, cy + 5)
+
+            painter.drawLine(cx + 5, cy - 5, cx - 5, cy + 5)
+
+            
+
+        elif self.icon_type == "settings":
+
+            painter.drawEllipse(cx - 4, cy - 4, 8, 8)
+
+            for i in range(6):
+
+                import math
+
+                angle = i * 60 * math.pi / 180
+
+                x1 = cx + int(6 * math.cos(angle))
+
+                y1 = cy + int(6 * math.sin(angle))
+
+                x2 = cx + int(10 * math.cos(angle))
+
+                y2 = cy + int(10 * math.sin(angle))
+
+                painter.drawLine(x1, y1, x2, y2)
+
+                
+
+        elif self.icon_type == "user":
+
+            painter.drawEllipse(cx - 5, cy - 10, 10, 10)
+
+            path = QPainterPath()
+
+            path.moveTo(cx - 10, cy + 10)
+
+            path.quadTo(cx - 10, cy, cx, cy + 2)
+
+            path.quadTo(cx + 10, cy, cx + 10, cy + 10)
+
+            painter.drawPath(path)
+
+            
+
+        elif self.icon_type == "robot":
+
+            painter.drawRoundedRect(cx - 8, cy - 6, 16, 14, 3, 3)
+
+            painter.setBrush(QBrush(color))
+
+            painter.drawEllipse(cx - 5, cy - 2, 4, 4)
+
+            painter.drawEllipse(cx + 1, cy - 2, 4, 4)
+
+            painter.drawLine(cx, cy - 6, cx, cy - 10)
+
+            painter.drawEllipse(cx - 2, cy - 12, 4, 4)
+
+            
+
+        elif self.icon_type == "trash":
+
+            painter.drawRect(cx - 6, cy - 4, 12, 12)
+
+            painter.drawLine(cx - 8, cy - 4, cx + 8, cy - 4)
+
+            painter.drawLine(cx - 4, cy - 7, cx + 4, cy - 7)
+
+            painter.drawLine(cx - 3, cy - 1, cx - 3, cy + 5)
+
+            painter.drawLine(cx, cy - 1, cx, cy + 5)
+
+            painter.drawLine(cx + 3, cy - 1, cx + 3, cy + 5)
+
+            
+
+        elif self.icon_type == "back":
+
+            path = QPainterPath()
+
+            path.moveTo(cx + 6, cy - 8)
+
+            path.lineTo(cx - 6, cy)
+
+            path.lineTo(cx + 6, cy + 8)
+
+            painter.drawPath(path)
+
+            
+
+        elif self.icon_type == "search":
+
+            painter.drawEllipse(cx - 7, cy - 7, 12, 12)
+
+            painter.drawLine(cx + 3, cy + 3, cx + 8, cy + 8)
+
+            
+
+        elif self.icon_type == "heart":
+
+            path = QPainterPath()
+
+            path.moveTo(cx, cy + 8)
+
+            path.cubicTo(cx - 10, cy, cx - 10, cy - 8, cx, cy - 4)
+
+            path.cubicTo(cx + 10, cy - 8, cx + 10, cy, cx, cy + 8)
+
+            if hasattr(self, 'filled') and self.filled:
+
+                painter.setBrush(QBrush(QColor("#ef4444")))
+
+                painter.setPen(QPen(QColor("#ef4444"), 2))
+
+            painter.drawPath(path)
+
+            
+
+        elif self.icon_type == "heart_filled":
+
+            path = QPainterPath()
+
+            path.moveTo(cx, cy + 8)
+
+            path.cubicTo(cx - 10, cy, cx - 10, cy - 8, cx, cy - 4)
+
+            path.cubicTo(cx + 10, cy - 8, cx + 10, cy, cx, cy + 8)
+
+            painter.setBrush(QBrush(QColor("#ef4444")))
+
+            painter.setPen(QPen(QColor("#ef4444"), 2))
+
+            painter.drawPath(path)
+
+        
+
+        painter.end()
+
+
+
+class NavButton(QPushButton):
+
+    """Sol sidebar navigasyon butonu"""
+
+    
+
+    def __init__(self, icon: str, text: str, active: bool = False, parent=None):
+
+        super().__init__(f"  {icon}   {text}", parent)
+
+        self.icon = icon
+
+        self.text_content = text
+
+        self.active = active
+
+        self.setCursor(Qt.CursorShape.PointingHandCursor)
+
+        self.setFixedHeight(44)
+
+        self.setFocusPolicy(Qt.FocusPolicy.NoFocus)
+
+        self.update_style()
+
+        
+
+    def update_style(self):
+
+        bg = "#2a2a3a" if self.active else "transparent"
+
+        color = "#ffffff" if self.active else "#8e8ea0"
+
+        self.setStyleSheet(f"""
+
+            QPushButton {{
+
+                background-color: {bg};
+
+                color: {color};
+
+                border: none;
+
+                outline: none; /* Gri odaklanma çizgisini siler */
+
+                border-radius: 10px;
+
+                padding: 10px 16px;
+
+                text-align: left;
+
+                font-size: 14px;
+
+                font-weight: 500;
+
+                font-family: 'Segoe UI', sans-serif;
+
+            }}
+
+            QPushButton:hover {{
+
+                background-color: #2a2a3a;
+
+                color: #ffffff;
+
+                border: none;
+
+                outline: none;
+
+            }}
+
+            QPushButton:focus {{
+
+                border: none;
+
+                outline: none; /* Tıklandığında çıkan kalıntı çizgiyi siler */
+
+            }}
+
+        """)
+
+        self.setText(f"  {self.icon}   {self.text_content}")
+
+        
+
+    def set_active(self, active: bool):
+
+        self.active = active
+
+        self.update_style()
+
+# ==========================================
+# FILE: src/ui/components/window_bar.py
+# ==========================================
+from PyQt6.QtWidgets import QFrame, QPushButton, QHBoxLayout, QLabel
+
+from PyQt6.QtCore import Qt, QRectF, QByteArray
+
+from PyQt6.QtGui import QPainter, QColor
+
+try:
+
+    from PyQt6.QtSvg import QSvgRenderer
+
+except ImportError:
+
+    QSvgRenderer = None
+
+
+
+class WindowButton(QPushButton):
+
+    """Windows 11 Tarzı SVG İkonlu Pencere Butonları"""
+
+    
+
+    ICONS = {
+
+        "min": '''<svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1">
+
+            <path d="M1 5h8" stroke-linecap="round"/>
+
+        </svg>''',
+
+        
+
+        "max": '''<svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1">
+
+            <rect x="1.5" y="1.5" width="7" height="7" rx="0.5"/>
+
+        </svg>''',
+
+        
+
+        "restore": '''<svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1">
+
+            <path d="M3.5 3.5v-2h5v5h-2"/>
+
+            <rect x="1.5" y="3.5" width="5" height="5" rx="0.5"/>
+
+        </svg>''',
+
+        
+
+        "close": '''<svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.2">
+
+            <path d="M2.5 2.5l5 5M7.5 2.5l-5 5" stroke-linecap="round"/>
+
+        </svg>'''
+
+    }
+
+
+
+    def __init__(self, btn_type: str, parent=None):
+
+        super().__init__(parent)
+
+        self.btn_type = btn_type
+
+        self.setFixedSize(46, 32)
+
+        self.setStyleSheet("background: transparent; border: none; outline: none;")
+
+        self._hovered = False
+
+        
+
+        if btn_type == "max":
+
+            self.setObjectName("btn_max")
+
+
+
+    def enterEvent(self, event):
+
+        self._hovered = True
+
+        self.update()
+
+        super().enterEvent(event)
+
+
+
+    def leaveEvent(self, event):
+
+        self._hovered = False
+
+        self.update()
+
+        super().leaveEvent(event)
+
+
+
+    def paintEvent(self, event):
+
+        painter = QPainter(self)
+
+        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+
+
+
+        if self._hovered:
+
+            if self.btn_type == "close":
+
+                painter.fillRect(self.rect(), QColor("#c42b1c"))
+
+            else:
+
+                painter.fillRect(self.rect(), QColor("#2d2d2d"))
+
+        
+
+        if self.btn_type == "close" and self._hovered:
+
+            icon_color = "#ffffff"
+
+        else:
+
+            icon_color = "#ffffff" if self._hovered else "#999999"
+
+
+
+        current_icon_svg = self.ICONS.get(self.btn_type)
+
+        
+
+        if self.btn_type == "max":
+
+            is_maximized = False
+
+            if self.window().windowHandle(): 
+
+                 is_maximized = (self.window().windowState() & Qt.WindowState.WindowMaximized)
+
+            
+
+            if is_maximized:
+
+                current_icon_svg = self.ICONS["restore"]
+
+            else:
+
+                current_icon_svg = self.ICONS["max"]
+
+
+
+        if current_icon_svg:
+
+            colored_svg = current_icon_svg.replace("currentColor", icon_color)
+
+            
+
+            if QSvgRenderer:
+
+                renderer = QSvgRenderer(QByteArray(colored_svg.encode()))
+
+                
+
+                icon_size = 10 
+
+                x = int((self.width() - icon_size) / 2)
+
+                y = int((self.height() - icon_size) / 2)
+
+                
+
+                renderer.render(painter, QRectF(x, y, icon_size, icon_size))
+
+        
+
+        painter.end()
+
+
+
+class CustomTitleBar(QFrame):
+
+    """Özel pencere başlık çubuğu"""
+
+    def __init__(self, parent_window):
+
+        super().__init__(parent_window)
+
+        self.parent_window = parent_window
+
+        self.setFixedHeight(32)
+
+        self.setStyleSheet("background-color: #0f0f10; border-bottom: 1px solid #27272a;")
+
+        
+
+        layout = QHBoxLayout(self)
+
+        layout.setContentsMargins(10, 0, 0, 0)
+
+        layout.setSpacing(10)
+
+        
+
+        title = QLabel("AI Chat")
+
+        title.setStyleSheet("color: #e4e4e7; font-family: 'Segoe UI'; font-size: 12px; font-weight: 600; border: none; outline: none;")
+
+        layout.addWidget(title)
+
+        
+
+        layout.addStretch()
+
+        
+
+        btn_min = WindowButton("min", self)
+
+        btn_min.clicked.connect(self.parent_window.showMinimized)
+
+        
+
+        btn_max = WindowButton("max", self)
+
+        btn_max.setObjectName("btn_max")
+
+        btn_max.clicked.connect(self.toggle_maximize)
+
+        
+
+        btn_close = WindowButton("close", self)
+
+        btn_close.clicked.connect(self.parent_window.close)
+
+        
+
+        layout.addWidget(btn_min)
+
+        layout.addWidget(btn_max)
+
+        layout.addWidget(btn_close)
+
+        
+
+        self.start_pos = None
+
+
+
+    def toggle_maximize(self):
+
+        if self.parent_window.isMaximized():
+
+            self.parent_window.showNormal()
+
+        else:
+
+            self.parent_window.showMaximized()
+
+        
+
+        self.findChild(WindowButton, "btn_max").update()
+
+
+
+    def mousePressEvent(self, event):
+
+        if event.button() == Qt.MouseButton.LeftButton:
+
+            self.start_pos = event.globalPosition().toPoint()
+
+
+
+    def mouseMoveEvent(self, event):
+
+        if self.start_pos:
+
+            delta = event.globalPosition().toPoint() - self.start_pos
+
+            self.parent_window.move(self.parent_window.pos() + delta)
+
+            self.start_pos = event.globalPosition().toPoint()
+
+
+
+    def mouseReleaseEvent(self, event):
+
+        self.start_pos = None
+
+    
+
+    def mouseDoubleClickEvent(self, event):
+
+        self.toggle_maximize()
+
+# ==========================================
+# FILE: src/ui/components/__init__.py
+# ==========================================
+from .base import load_avatar_pixmap, SmoothScrollArea, GradientFrame
+from .inputs import SearchBar, ModernButton, CategoryTab, IconButton, SearchIconWidget
+from .chat import ChatBubble, TypingIndicator, SendButton
+from .cards import CharacterCard, FeaturedCharacterCard, HistoryItem, SuggestionCard, QuickActionCard
+from .branding import LogoWidget
+from .window_bar import CustomTitleBar, WindowButton
+from .sidebar_items import SidebarIconButton, NavButton
+
+# ==========================================
+# FILE: src/ui/pages/home_page.py
+# ==========================================
+import random
+
+from PyQt6.QtWidgets import (
+
+    QWidget, QVBoxLayout, QHBoxLayout, QLabel, QFrame, QGridLayout
+
+)
+
+from PyQt6.QtCore import Qt, pyqtSignal
+
+from src.ui.components import (
+
+    SmoothScrollArea, SearchBar, SidebarIconButton, CategoryTab, 
+
+    FeaturedCharacterCard, CharacterCard
+
+)
+
+
+
+class HomePage(QWidget):
+
+    character_selected = pyqtSignal(str) 
+
+    profile_clicked = pyqtSignal()
+
+
+
+    def __init__(self, characters, user_favorites, parent=None):
+
+        super().__init__(parent)
+
+        self.characters = characters
+
+        self.user_favorites = user_favorites
+
+        self.setup_ui()
+
+
+
+    def setup_ui(self):
+
+        layout = QVBoxLayout(self)
+
+        layout.setContentsMargins(0, 0, 0, 0)
+
+        layout.setSpacing(20)
+
+
+
+        header = QFrame()
+
+        header.setFixedHeight(70)
+
+        header.setStyleSheet("background-color: #18181b; border-bottom: 1px solid #27272a;")
+
+        header_layout = QHBoxLayout(header)
+
+        header_layout.setContentsMargins(30, 0, 30, 0)
+
+        
+
+        self.search_bar = SearchBar()
+
+        self.search_bar.setFixedWidth(400)
+
+        header_layout.addWidget(self.search_bar)
+
+        
+
+        header_layout.addStretch()
+
+        
+
+        btn_profile = SidebarIconButton("user", "Profile")
+
+        btn_profile.setFixedSize(40, 40)
+
+        btn_profile.clicked.connect(self.profile_clicked.emit)
+
+        header_layout.addWidget(btn_profile)
+
+        
+
+        layout.addWidget(header)
+
+
+
+        main_scroll = SmoothScrollArea()
+
+        scroll_content = QWidget()
+
+        scroll_content.setStyleSheet("background: transparent;")
+
+        
+
+        content_layout = QVBoxLayout(scroll_content)
+
+        content_layout.setContentsMargins(30, 30, 30, 30)
+
+        content_layout.setSpacing(30)
+
+
+
+        welcome = QLabel("Chat with Characters")
+
+        welcome.setStyleSheet("color: #ffffff; font-size: 32px; font-weight: bold;")
+
+        content_layout.addWidget(welcome)
+
+
+
+        featured_label = QLabel("Featured (Random Selection)")
+
+        featured_label.setStyleSheet("color: #a1a1aa; font-size: 14px; font-weight: 600;")
+
+        content_layout.addWidget(featured_label)
+
+
+
+        featured_scroll = SmoothScrollArea(orientation="horizontal")
+
+        featured_scroll.setFixedHeight(230)
+
+        featured_content = QWidget()
+
+        featured_layout = QHBoxLayout(featured_content)
+
+        featured_layout.setContentsMargins(0, 10, 0, 10)
+
+        featured_layout.setSpacing(15)
+
+        
+
+        all_char_names = list(self.characters.keys())
+
+        limit = 25
+
+        sample_size = min(len(all_char_names), limit)
+
+        
+
+        if sample_size > 0:
+
+            random_chars = random.sample(all_char_names, sample_size)
+
+            for name in random_chars:
+
+                data = self.characters[name]
+
+                card = FeaturedCharacterCard(name, data)
+
+                card.clicked.connect(self.character_selected.emit)
+
+                featured_layout.addWidget(card)
+
+        
+
+        featured_layout.addStretch()
+
+        featured_content.setLayout(featured_layout)
+
+        featured_scroll.setWidget(featured_content)
+
+        content_layout.addWidget(featured_scroll)
+
+
+
+        all_title = QLabel("All Characters")
+
+        all_title.setStyleSheet("color: #a1a1aa; font-size: 14px; font-weight: 600; margin-top: 20px;")
+
+        content_layout.addWidget(all_title)
+
+        
+
+        grid_container = QWidget()
+
+        grid_layout = QGridLayout(grid_container)
+
+        grid_layout.setContentsMargins(0, 0, 0, 0)
+
+        grid_layout.setSpacing(20)
+
+        
+
+        columns = 3
+
+        
+
+        for index, (name, data) in enumerate(self.characters.items()):
+
+            card = CharacterCard(name, data, is_selected=False)
+
+            card.clicked.connect(self.character_selected.emit)
+
+            
+
+            row = index // columns
+
+            col = index % columns
+
+            grid_layout.addWidget(card, row, col)
+
+            
+
+        content_layout.addWidget(grid_container)
+
+        content_layout.addStretch()
+
+        
+
+        main_scroll.setWidget(scroll_content)
+
+        layout.addWidget(main_scroll)
+
+        
+
+    def refresh_content(self, characters, favorites):
+
+        self.characters = characters
+
+        self.user_favorites = favorites
+
+# ==========================================
+# FILE: src/ui/pages/profile_page.py
+# ==========================================
+from PyQt6.QtWidgets import (
+
+    QWidget, QVBoxLayout, QHBoxLayout, QLabel, QFrame, 
+
+    QPushButton, QGridLayout, QTabWidget, QScrollArea, QTextEdit
+
+)
+
+from PyQt6.QtCore import Qt, pyqtSignal
+
+from PyQt6.QtGui import QCursor
+
+from src.ui.components import (
+
+    SmoothScrollArea, SidebarIconButton, CharacterCard, ModernButton
+
+)
+
+
+
+class ProfilePage(QWidget):
+
+    character_selected = pyqtSignal(str)
+
+    create_character_clicked = pyqtSignal()
+
+    edit_persona_clicked = pyqtSignal()
+
+    logout_clicked = pyqtSignal()
+
+
+
+    def __init__(self, user_data, characters, parent=None):
+
+        super().__init__(parent)
+
+        self.user_data = user_data
+
+        self.characters = characters
+
+        self.setup_ui()
+
+
+
+    def setup_ui(self):
+
+        layout = QVBoxLayout(self)
+
+        layout.setContentsMargins(0, 0, 0, 0)
+
+        layout.setSpacing(0)
+
+
+
+        scroll = SmoothScrollArea()
+
+        content_widget = QWidget()
+
+        content_layout = QVBoxLayout(content_widget)
+
+        content_layout.setContentsMargins(40, 40, 40, 40)
+
+        content_layout.setSpacing(30)
+
+
+
+        profile_card = QFrame()
+
+        profile_card.setStyleSheet("""
+
+            QFrame {
+
+                background-color: #18181b;
+
+                border: 1px solid #27272a;
+
+                border-radius: 16px;
+
+            }
+
+        """)
+
+        card_layout = QHBoxLayout(profile_card)
+
+        card_layout.setContentsMargins(30, 30, 30, 30)
+
+        card_layout.setSpacing(30)
+
+
+
+        self.avatar_lbl = QLabel()
+
+        self.avatar_lbl.setFixedSize(100, 100)
+
+        current_persona = self._get_current_persona()
+
+        self._set_avatar(current_persona)
+
+        card_layout.addWidget(self.avatar_lbl)
+
+
+
+        info_layout = QVBoxLayout()
+
+        print("Gelen User Data:", self.user_data)
+
+        real_username = self.user_data.get("username", current_persona.get("name", "User"))
+
+        self.name_lbl = QLabel(real_username)
+
+        self.name_lbl.setStyleSheet("color: white; font-size: 32px; font-weight: bold; border: none;")
+
+        info_layout.addWidget(self.name_lbl)
+
+
+
+        self.bio_lbl = QLabel(current_persona.get("description", "No biography added yet."))
+
+        self.bio_lbl.setStyleSheet("color: #a1a1aa; font-size: 14px; border: none;")
+
+        self.bio_lbl.setWordWrap(True)
+
+        info_layout.addWidget(self.bio_lbl)
+
+        
+
+        card_layout.addLayout(info_layout)
+
+        card_layout.addStretch()
+
+        
+
+        btn_edit = SidebarIconButton("settings", "Edit Profile")
+
+        btn_edit.clicked.connect(self.edit_persona_clicked.emit)
+
+        card_layout.addWidget(btn_edit, alignment=Qt.AlignmentFlag.AlignTop)
+
+
+
+        content_layout.addWidget(profile_card)
+
+
+
+        self.tabs = QTabWidget()
+
+        self.tabs.setStyleSheet("""
+
+            QTabWidget::pane { border: none; }
+
+            QTabBar::tab {
+
+                background: transparent;
+
+                color: #71717a;
+
+                font-size: 16px;
+
+                font-weight: 600;
+
+                padding: 10px 20px;
+
+                border-bottom: 2px solid transparent;
+
+            }
+
+            QTabBar::tab:selected {
+
+                color: #6366f1;
+
+                border-bottom: 2px solid #6366f1;
+
+            }
+
+            QTabBar::tab:hover { color: #e4e4e7; }
+
+        """)
+
+
+
+        tab_chars = QWidget()
+
+        chars_layout = QVBoxLayout(tab_chars)
+
+        chars_layout.setContentsMargins(0, 20, 0, 0)
+
+        
+
+        btn_create = ModernButton("+ Create New Character", primary=True)
+
+        btn_create.setFixedWidth(250)
+
+        btn_create.clicked.connect(self.create_character_clicked.emit)
+
+        chars_layout.addWidget(btn_create, alignment=Qt.AlignmentFlag.AlignLeft)
+
+        chars_layout.addSpacing(20)
+
+
+
+        grid_widget = QWidget()
+
+        self.chars_grid = QGridLayout(grid_widget)
+
+        self.chars_grid.setContentsMargins(0, 0, 0, 0)
+
+        self.chars_grid.setSpacing(20)
+
+        self.chars_grid.setAlignment(Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignTop)
+
+        
+
+        self.refresh_characters_grid()
+
+        
+
+        chars_layout.addWidget(grid_widget)
+
+        chars_layout.addStretch()
+
+        self.tabs.addTab(tab_chars, "My Characters")
+
+
+
+        tab_personas = QWidget()
+
+        personas_layout = QVBoxLayout(tab_personas)
+
+        personas_layout.setContentsMargins(0, 20, 0, 0)
+
+        personas_layout.setSpacing(10)
+
+        
+
+        lbl_info = QLabel("Different identities you use in chats:")
+
+        lbl_info.setStyleSheet("color: #a1a1aa; font-size: 14px;")
+
+        personas_layout.addWidget(lbl_info)
+
+        
+
+        self.personas_container = QVBoxLayout()
+
+        self.refresh_personas_list()
+
+        personas_layout.addLayout(self.personas_container)
+
+        
+
+        personas_layout.addStretch()
+
+        self.tabs.addTab(tab_personas, "My Personas")
+
+
+
+        content_layout.addWidget(self.tabs)
+
+        content_layout.addStretch()
+
+
+
+        btn_logout = ModernButton("Logout", danger=True)
+
+        btn_logout.setFixedWidth(200)
+
+        btn_logout.clicked.connect(self.logout_clicked.emit)
+
+        content_layout.addWidget(btn_logout, alignment=Qt.AlignmentFlag.AlignRight)
+
+
+
+        scroll.setWidget(content_widget)
+
+        layout.addWidget(scroll)
+
+
+
+    def _get_current_persona(self):
+
+        """Mevcut seçili personayı veya ilkini döndürür"""
+
+        personas = self.user_data.get("personas", [])
+
+        if personas:
+
+            return personas[0]
+
+        return {}
+
+
+
+    def _set_avatar(self, persona):
+
+        avatar_path = persona.get("avatar")
+
+        if avatar_path:
+             fixed_path = avatar_path.replace('\\', '/')
+             self.avatar_lbl.setStyleSheet(f"""
+
+                border-radius: 50px; 
+
+                border: 2px solid #6366f1;
+
+                background-image: url('{fixed_path}');
+
+                background-position: center;
+
+                background-repeat: no-repeat; 
+
+             """)
+
+        else:
+
+            name = persona.get("name", "U")
+
+            display_char = name[0].upper() if name else "U"
+
+            self.avatar_lbl.setText(display_char)
+
+            self.avatar_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+            self.avatar_lbl.setStyleSheet("""
+
+                background-color: #27272a; 
+
+                color: white; 
+
+                font-size: 40px; 
+
+                font-weight: bold; 
+
+                border-radius: 50px;
+
+                border: 2px solid #3f3f46;
+
+            """)
+
+
+
+    def refresh_characters_grid(self):
+
+        """Karakterleri grid'e dizer"""
+
+        while self.chars_grid.count():
+
+            item = self.chars_grid.takeAt(0)
+
+            if item.widget(): item.widget().deleteLater()
+
+
+
+        columns = 3
+
+        for index, (name, data) in enumerate(self.characters.items()):
+
+            card = CharacterCard(name, data, is_selected=False)
+
+            card.setFixedWidth(240)
+
+            card.clicked.connect(self.character_selected.emit)
+
+            
+
+            row = index // columns
+
+            col = index % columns
+
+            self.chars_grid.addWidget(card, row, col)
+
+
+
+    def refresh_personas_list(self):
+
+        """Personaları liste halinde gösterir"""
+
+        while self.personas_container.count():
+
+            item = self.personas_container.takeAt(0)
+
+            if item.widget(): item.widget().deleteLater()
+
+            
+
+        personas = self.user_data.get("personas", [])
+
+        
+
+        for p in personas:
+
+            p_frame = QFrame()
+
+            p_frame.setStyleSheet("background-color: #1e1e2e; border-radius: 10px; padding: 10px;")
+
+            p_layout = QHBoxLayout(p_frame)
+
+            
+
+            p_avatar = QLabel()
+
+            p_avatar.setFixedSize(40, 40)
+
+            path = p.get("avatar")
+
+            if path:
+                path_fixed = path.replace('\\', '/')
+                p_avatar.setStyleSheet(f"border-radius: 20px; background-image: url('{path_fixed}'); background-position: center;")
+
+            else:
+
+                name = p.get("name", "U")
+
+                display_char = name[0].upper() if name else "U"
+
+                p_avatar.setText(display_char)
+
+                p_avatar.setStyleSheet("background-color: #6366f1; color: white; border-radius: 20px; qproperty-alignment: AlignCenter; font-weight: bold;")
+
+            
+
+            p_layout.addWidget(p_avatar)
+
+            
+
+            p_info = QVBoxLayout()
+
+            p_name = QLabel(p.get("name", "Unnamed"))
+
+            p_name.setStyleSheet("color: white; font-weight: bold; font-size: 14px; border: none;")
+
+            p_desc = QLabel(p.get("description", "")[:50] + "...")
+
+            p_desc.setStyleSheet("color: #a1a1aa; font-size: 12px; border: none;")
+
+            p_info.addWidget(p_name)
+
+            p_info.addWidget(p_desc)
+
+            p_layout.addLayout(p_info)
+
+            
+
+            p_layout.addStretch()
+
+            
+
+            btn_edit = QPushButton("Edit")
+
+            btn_edit.setCursor(Qt.CursorShape.PointingHandCursor)
+
+            btn_edit.setStyleSheet("color: #6366f1; border: none; font-weight: bold; background: transparent;")
+
+            btn_edit.clicked.connect(self.edit_persona_clicked.emit)
+
+            p_layout.addWidget(btn_edit)
+
+            
+
+            self.personas_container.addWidget(p_frame)
+
+            
+
+    def refresh_content(self, user_data, characters):
+
+        """Veri değiştiğinde sayfayı yenilemek için"""
+
+        self.user_data = user_data
+
+        self.characters = characters
+
+        
+
+        current = self._get_current_persona()
+
+        
+
+        
+
+        real_username = self.user_data.get("username", current.get("name", "User"))
+
+        self.name_lbl.setText(real_username)
+
+
+
+        self.bio_lbl.setText(current.get("description", ""))
+
+        self._set_avatar(current)
+
+        
+
+        self.refresh_characters_grid()
+
+        self.refresh_personas_list()
+
+# ==========================================
+# FILE: src/ui/pages/settings_page.py
+# ==========================================
+from PyQt6.QtWidgets import QWidget, QVBoxLayout, QLabel, QFrame, QHBoxLayout
+
+from PyQt6.QtCore import Qt
+
+from src.ui.components import ModernButton
+
+
+
+class SettingsPage(QWidget):
+
+    def __init__(self, parent=None):
+
+        super().__init__(parent)
+
+        layout = QVBoxLayout(self)
+
+        layout.setContentsMargins(40, 40, 40, 40)
+
+        layout.setSpacing(20)
+
+        
+
+        title = QLabel("Settings")
+
+        title.setStyleSheet("color: white; font-size: 28px; font-weight: bold;")
+
+        layout.addWidget(title)
+
+        
+
+        group_box = QFrame()
+
+        group_box.setStyleSheet("background-color: #1e1e2e; border-radius: 12px;")
+
+        group_layout = QVBoxLayout(group_box)
+
+        group_layout.setContentsMargins(20, 20, 20, 20)
+
+        
+
+        lbl_theme = QLabel("Appearance Mode")
+
+        lbl_theme.setStyleSheet("color: #e0e0e0; font-size: 16px;")
+
+        group_layout.addWidget(lbl_theme)
+
+        
+
+        btn_layout = QHBoxLayout()
+
+        btn_dark = ModernButton("Dark Mode", primary=True)
+
+        btn_light = ModernButton("Light Mode")
+
+        btn_layout.addWidget(btn_dark)
+
+        btn_layout.addWidget(btn_light)
+
+        btn_layout.addStretch()
+
+        
+
+        group_layout.addLayout(btn_layout)
+
+        layout.addWidget(group_box)
+
+        
+
+        layout.addStretch()
+
+        
+
+        logout_btn = ModernButton("Logout", danger=True)
+
+        layout.addWidget(logout_btn, alignment=Qt.AlignmentFlag.AlignLeft)
+
