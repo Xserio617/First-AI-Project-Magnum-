@@ -295,14 +295,14 @@ class ProfilePage(QWidget):
         avatar_path = persona.get("avatar")
 
         if avatar_path:
-
+             fixed_path = avatar_path.replace('\\', '/')
              self.avatar_lbl.setStyleSheet(f"""
 
                 border-radius: 50px; 
 
                 border: 2px solid #6366f1;
 
-                background-image: url('{avatar_path.replace('\\', '/')}');
+                background-image: url('{fixed_path}');
 
                 background-position: center;
 
@@ -403,8 +403,8 @@ class ProfilePage(QWidget):
             path = p.get("avatar")
 
             if path:
-
-                p_avatar.setStyleSheet(f"border-radius: 20px; background-image: url('{path.replace('\\','/')}'); background-position: center;")
+                path_fixed = path.replace('\\', '/')
+                p_avatar.setStyleSheet(f"border-radius: 20px; background-image: url('{path_fixed}'); background-position: center;")
 
             else:
 

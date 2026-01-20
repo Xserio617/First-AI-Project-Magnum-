@@ -2,3 +2,11 @@ ollama
 packaging
 PyQt6
 huggingface_hub
+--index-url https://download.pytorch.org/whl/nightly/cu126
+torch
+diffusers
+transformers
+accelerate
+protobuf
+sentencepiece
+bcrypt

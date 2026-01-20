@@ -163,6 +163,7 @@ class ChatBubble(QFrame):
         
 
         self.msg_label.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
+        self.msg_label.setOpenExternalLinks(True)
 
         self.msg_label.customContextMenuRequested.connect(self.show_context_menu)
 
@@ -232,6 +233,15 @@ class ChatBubble(QFrame):
 
         text = re.sub(r'\*(.*?)\*', r'<i>\1</i>', text)
 
+        def img_replacer(match):
+            path = match.group(1)
+            if ":" in path and not path.startswith("file:///"):
+                url = "file:///" + path.replace("\\", "/")
+            else:
+                url = path
+            return f'<br><a href="{url}"><img src="{url}" width="350"></a><br>'
+        text = re.sub(r'\|\|IMG:(.*?)\|\|', img_replacer, text)
+        
         text = text.replace("\n", "<br>")
 
         return text

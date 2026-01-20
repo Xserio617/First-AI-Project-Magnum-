@@ -13,3 +13,5 @@ models/
 data/chat_history.db
 session.json
 data/user_persona.json
+assets/generated_images/
+assets/avatars/

@@ -226,7 +226,8 @@ class CharacterPopup(QDialog):
 
             self.btn_avatar.setText("")
 
-            self.btn_avatar.setStyleSheet(f"QPushButton {{ background-color: #27272a; border: 2px solid #6366f1; border-radius: 40px; border-image: url({file_name.replace('\\', '/')}) 0 0 0 0 stretch stretch; }}")
+            file_path = file_name.replace('\\', '/')
+            self.btn_avatar.setStyleSheet(f"QPushButton {{ background-color: #27272a; border: 2px solid #6366f1; border-radius: 40px; border-image: url({file_path}) 0 0 0 0 stretch stretch; }}")
 
 
 
@@ -528,7 +529,8 @@ class PersonaPopup(QDialog):
 
             self.btn_avatar.setText("") 
 
-            self.btn_avatar.setStyleSheet(f"QPushButton {{ background-color: #27272a; border: 2px solid #6366f1; border-radius: 40px; border-image: url('{path.replace('\\', '/')}') 0 0 0 0 stretch stretch; }}")
+            path_fixed = path.replace('\\', '/')
+            self.btn_avatar.setStyleSheet(f"QPushButton {{ background-color: #27272a; border: 2px solid #6366f1; border-radius: 40px; border-image: url('{path_fixed}') 0 0 0 0 stretch stretch; }}")
 
         else:
 
