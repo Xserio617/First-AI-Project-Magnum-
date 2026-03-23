@@ -5,6 +5,29 @@ from src.config import MODEL_NAME
 
 
 class AIEngine:
+    def __init__(self):
+        self.force_cpu = False
+
+    def _is_cuda_runner_error(self, err: Exception) -> bool:
+        msg = str(err).lower()
+        return (
+            "cuda error" in msg
+            or "status code: 500" in msg
+            or "llama runner process has terminated" in msg
+        )
+
+    def _build_options(self, kwargs):
+        options = dict(kwargs) if kwargs else {}
+        if self.force_cpu:
+            options["num_gpu"] = 0
+        return options
+
+    def check_connection(self):
+        try:
+            ollama.list()
+            return True
+        except:
+            return False
 
     def generate_response_stream(self, system_prompt, user_persona, chat_history, user_message, **kwargs):
 
@@ -72,24 +95,67 @@ FORMATTING RULES:
 
 
 
-        try:
+        def stream_with_fallback():
+            options = self._build_options(kwargs)
 
-            return ollama.chat(
+            try:
+                stream = ollama.chat(
+                    model=MODEL_NAME,
+                    messages=messages_payload,
+                    stream=True,
+                    options=options,
+                )
+                for chunk in stream:
+                    yield chunk
+                return
+            except Exception as e:
+                if "10061" in str(e):
+                    raise ConnectionError("Could not connect to Ollama. Make sure the app is running.") from e
+                if self._is_cuda_runner_error(e) and not self.force_cpu:
+                    print("CUDA runner failed. Retrying with CPU mode (num_gpu=0)...")
+                    self.force_cpu = True
+                else:
+                    raise e
 
-                model=MODEL_NAME, 
-
-                messages=messages_payload, 
-
-                stream=True, 
-
-                options=kwargs
-
+            stream = ollama.chat(
+                model=MODEL_NAME,
+                messages=messages_payload,
+                stream=True,
+                options=self._build_options(kwargs),
             )
+            for chunk in stream:
+                yield chunk
 
+        return stream_with_fallback()
+
+    def generate_simple_response(self, messages, **kwargs):
+        """
+        Stream olmayan tek seferlik yanıt döndürür.
+        """
+        try:
+            response = ollama.chat(
+                model=MODEL_NAME, 
+                messages=messages, 
+                stream=False, 
+                options=self._build_options(kwargs)
+            )
+            if 'message' in response and 'content' in response['message']:
+                return response['message']['content']
+            return None
         except Exception as e:
-
-            if "10061" in str(e):
-
-                raise ConnectionError("Could not connect to Ollama. Make sure the app is running.") from e
-
-            raise e
+            if self._is_cuda_runner_error(e) and not self.force_cpu:
+                print("CUDA runner failed. Retrying with CPU mode (num_gpu=0)...")
+                self.force_cpu = True
+                try:
+                    response = ollama.chat(
+                        model=MODEL_NAME,
+                        messages=messages,
+                        stream=False,
+                        options=self._build_options(kwargs),
+                    )
+                    if 'message' in response and 'content' in response['message']:
+                        return response['message']['content']
+                except Exception as retry_err:
+                    print(f"Simple generation retry error: {retry_err}")
+            print(f"Simple generation error: {e}")
+            return None

@@ -366,6 +366,9 @@ class ChatBubble(QFrame):
 
         self.msg_id = msg_id
 
+    def request_image_generation(self):
+        self.generate_image_requested.emit(self.text_content)
+
 
 
 class TypingIndicator(QFrame):

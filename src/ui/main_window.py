@@ -30,6 +30,50 @@ from src.ui.pages.home_page import HomePage
 from src.ui.pages.settings_page import SettingsPage
 from src.ui.pages.profile_page import ProfilePage 
 
+class PromptEnhancerWorker(QThread):
+    finished = pyqtSignal(str)
+    error = pyqtSignal(str)
+
+    def __init__(self, ai_engine, history, char_def):
+        super().__init__()
+        self.ai = ai_engine
+        self.history = history
+        self.char_def = char_def
+
+    def run(self):
+        try:
+            # Construct context from history
+            context_str = ""
+            for row in self.history[-10:]: # Last 10 messages for context
+                role = "Character" if row[1] == "assistant" else "User"
+                context_str += f"{role}: {row[2]}\n"
+            
+            system_prompt = (
+                "You are an expert visual director and prompt engineer for Stable Diffusion. "
+                "Your task is to analyze the roleplay context below and write a detailed image generation prompt "
+                "that captures the CURRENT scene, action, and atmosphere.\n"
+                "RULES:\n"
+                "1. Output ONLY the prompt. No intro, no explanations.\n"
+                "2. Focus on visual details: lighting, camera angle, character appearance, environment.\n"
+                "3. Use keywords and phrases formatted for Stable Diffusion (e.g. 'cinematic lighting, detailed background').\n"
+                "4. Do NOT include dialogue.\n"
+                "5. Character appearance: " + (self.char_def.get('description', '') or self.char_def.get('prompt', '')[:200]) + "\n"
+            )
+
+            messages = [
+                {'role': 'system', 'content': system_prompt},
+                {'role': 'user', 'content': f"Context:\n{context_str}\n\nDESCRIBE THE SCENE:"}
+            ]
+
+            enhanced_prompt = self.ai.generate_simple_response(messages, temperature=0.7)
+            
+            if enhanced_prompt:
+                self.finished.emit(enhanced_prompt)
+            else:
+                self.error.emit("Failed to generate prompt description.")
+        except Exception as e:
+            self.error.emit(str(e))
+
 class ChatRowWidget(QWidget):
     def __init__(self, name, last_message, avatar_char, on_pin_click, on_delete_click):
         super().__init__()
@@ -126,6 +170,15 @@ class MainApp(QMainWindow):
         
         self.db = DatabaseManager()
         self.ai = AIEngine()
+        
+        # Check connection on startup
+        if not self.ai.check_connection():
+            QMessageBox.critical(self, "Connection Error", 
+                "Could not connect to the AI Engine (Ollama).\n\n"
+                "Please make sure the Ollama application is running in the background.\n"
+                "Error code: 10061 (Connection Refused)"
+            )
+
         self.img_gen = ImageGenerator()
         
         self.characters = load_json(CHAR_FILE, DEFAULT_CHAR)
@@ -368,7 +421,40 @@ class MainApp(QMainWindow):
         QTimer.singleShot(100, self.msg_scroll.scroll_to_bottom)
 
     def add_bubble(self, text: str, role: str, msg_id: int = None, user_name: str = "You"):
-        bubble = ChatBubble(text, role, user_name, self.current_char or "AI", msg_id); bubble.rewind_requested.connect(self.rewind_chat); self.msg_layout.insertWidget(self.msg_layout.count() - 1, bubble); return bubble
+        bubble = ChatBubble(text, role, user_name, self.current_char or "AI", msg_id)
+        bubble.rewind_requested.connect(self.rewind_chat)
+        bubble.generate_image_requested.connect(self.handle_image_generation_request)
+        self.msg_layout.insertWidget(self.msg_layout.count() - 1, bubble)
+        return bubble
+
+    def handle_image_generation_request(self, prompt: str):
+        if self.is_generating: return
+
+        self.is_generating = True
+        self.btn_send.setDisabled(True)
+        self.input_field.setReadOnly(True)
+        self.input_field.setPlaceholderText("Analyzing scene for image generation...")
+
+        self.current_ai_bubble = self.add_bubble("🎨 *Visualizing scene...*", "assistant")
+        self.msg_scroll.scroll_to_bottom()
+
+        # Enhancer başlat
+        history = self.db.get_history(self.current_char)
+        char_def = self.characters.get(self.current_char, {})
+        
+        self.enhancer = PromptEnhancerWorker(self.ai, history, char_def)
+        self.enhancer.finished.connect(self.on_prompt_enhanced)
+        self.enhancer.error.connect(self.on_image_error)
+        self.enhancer.start()
+
+    def on_prompt_enhanced(self, enhanced_prompt):
+        if self.current_ai_bubble:
+            self.current_ai_bubble.update_text(f"🎨 *Painting: {enhanced_prompt[:40]}...*")
+            
+        self.img_worker = ImageGenWorker(self.img_gen, enhanced_prompt)
+        self.img_worker.finished.connect(self.on_image_ready)
+        self.img_worker.error.connect(self.on_image_error)
+        self.img_worker.start()
 
     def eventFilter(self, obj, event):
         if obj == self.input_field and event.type() == event.Type.KeyPress:

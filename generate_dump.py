@@ -22,7 +22,6 @@ IGNORE_DIRS = {
 IGNORE_FILES = {
     "project_dump.txt",
     "generate_dump.py",
-    "full_project_dump.py",
     ".DS_Store",
     "session.json", # Usually local session data, maybe exclude? I'll exclude it to be safe/clean
 }
